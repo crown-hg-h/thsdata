@@ -8,9 +8,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.60'
-DESCRIPTION = 'a python package for ths data'
-LONG_DESCRIPTION = 'a python package for ths data'
+VERSION = '0.0.61'
+DESCRIPTION = 'a python package for thsdata'
+LONG_DESCRIPTION = 'a python package for thsdata'
 
 # Setting up
 setup(
@@ -25,7 +25,6 @@ setup(
     include_package_data=True,
     install_requires=[
         'thsdk==0.0.1',
-        'pandas~=2.2.3'
     ],
     keywords=['python', 'thsdata'],
     classifiers=[
