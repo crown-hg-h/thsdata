@@ -14,8 +14,20 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
    installation
    usage/quickstart
+   api
+
+Introduction
+============
+
+Welcome to the `thsdata` documentation. This package provides tools to interact with the `thsdata` API, allowing you to retrieve and analyze financial data.
+
+Features:
+- Connect to the `thsdata` server
+- Retrieve historical data
+- Analyze financial data
 
 Installation
 ============
@@ -54,3 +66,14 @@ Here is a quick example of how to use the `thsdata` package:
 
    if __name__ == "__main__":
        main()
+
+
+API
+===
+
+The `thsdata` package provides the following modules and functions:
+
+.. automodule:: thsdata
+   :members:
+   :undoc-members:
+   :show-inheritance:
