@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-data documentation
+thsdata documentation
 =====================
 
 Add your content using ``reStructuredText`` syntax. See the
@@ -25,9 +25,19 @@ Introduction
 Welcome to the `thsdata` documentation. This package provides tools to interact with the `thsdata` API, allowing you to retrieve and analyze financial data.
 
 Features:
-- Connect to the `thsdata` server
-- Retrieve historical data
-- Analyze financial data
+
+- 支持股票，可转债，基金市场行情数据
+- 集合竞价数据，成交明细数据，分时数据
+- 获取个股年，季度，月度，周度，日度，分钟行情数据
+- 获取同花顺行业，同花顺概念，同花顺地域，同花顺板块行情数据
+- 获取个股资金流向数据
+- 获取个股财务数据
+- 获取个股新闻数据
+- 获取个股公告数据
+- 获取个股研报数据
+- 获取个股龙虎榜数据
+- 获取个股大宗交易数据
+
 
 Installation
 ============
