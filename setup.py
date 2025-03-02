@@ -24,7 +24,7 @@ setup(
     packages=find_packages(where='.', exclude=(), include=('*',)),
     include_package_data=True,
     install_requires=[
-        'thsdk==0.0.1',
+        'thsdk>=0.0.1',
     ],
     keywords=['python', 'thsdata'],
     classifiers=[
