@@ -18,15 +18,26 @@ import thsdata
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-language = 'zh_CN'
+language = 'en'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'alabaster'
+
+html_theme_options = {
+    "show_powered_by": False,
+    "github_user": "thsdata",
+    "github_repo": "thsdata",
+    "github_banner": True,
+    "show_related": False,
+    "note_bg": "#FFF59C",
+}
+
 html_static_path = ['_static']
