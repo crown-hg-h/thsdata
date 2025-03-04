@@ -7,49 +7,32 @@ Here is a quick example of how to use the `thsdata` package:
 
 .. code-block:: python
 
-   from thsdata import ZhuThsQuote, FuquanNo, KlineDay
-   import pandas as pd
+      from thsdata import Quote, FuquanNo
+      import datetime
 
 
-   def main():
-       # 初始化
-       quote = ZhuThsQuote()
+      def main():
+          # 初始化
+          quote = Quote()
 
-       try:
-           # 连接到行情服务器
-           login_reply = quote.connect()
-           if login_reply.err_code != 0:
-               print(f"登录错误:{login_reply.err_code}, 信息:{login_reply.err_message}")
-               return
-           else:
-               print("Connected to the server.")
+          try:
+              # quote.connect()
+              start_date = datetime.datetime(2024, 1, 1)
+              end_date = datetime.datetime(2025, 2, 28)
+              data = quote.security_bars_daily("USHA600519", start_date, end_date, FuquanNo)
+              print(data)
 
-           # 获取历史日级别数据
-           reply = quote.security_bars("USHA600519", 20240101, 20250228, FuquanNo, KlineDay)
+          except Exception as e:
+              print("An error occurred:", e)
 
-           if reply.err_code != 0:
-               print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
-               return
-
-           resp = reply.resp
-           df = pd.DataFrame(resp.data)
-           print(df)
-
-           print("查询成功 数量:", len(resp.data))
-
-       except Exception as e:
-           print("An error occurred:", e)
-
-       finally:
-           # 断开连接
-           quote.disconnect()
-           print("Disconnected from the server.")
+          finally:
+              # 断开连接
+              quote.disconnect()
+              print("Disconnected from the server.")
 
 
-   if __name__ == "__main__":
-       main()
-
-
+      if __name__ == "__main__":
+          main()
 
 
 
