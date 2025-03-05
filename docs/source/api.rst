@@ -32,3 +32,7 @@ important right here and provide links to the canonical documentation.
 .. automethod:: thsdata.Quote.security_bars
 .. automethod:: thsdata.Quote.call_auction
 
+
+特色数据
+--------------------
+.. automethod:: thsdata.Quote.wencai

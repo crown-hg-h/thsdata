@@ -5,10 +5,14 @@ Quickstart
 
 Here is a quick example of how to use the `thsdata` package:
 
+
+证券代码查询
+--------------------
+
+
 .. code-block:: python
 
-      from thsdata import Quote, FuquanNo
-      import datetime
+      from thsdata import Quote
 
 
       def main():
@@ -17,9 +21,7 @@ Here is a quick example of how to use the `thsdata` package:
 
           try:
               # quote.connect()
-              start_date = datetime.datetime(2024, 1, 1)
-              end_date = datetime.datetime(2025, 2, 28)
-              data = quote.security_bars_daily("USHA600519", start_date, end_date, FuquanNo)
+              data = quote.stock_codes()
               print(data)
 
           except Exception as e:
@@ -36,9 +38,65 @@ Here is a quick example of how to use the `thsdata` package:
 
 
 
+
+
 .. code-block:: text
 
-   Connected to the server.
+               code   name
+   0     USTM832566    梓橦宫
+   1     USZA002346   柘中股份
+   2     USZA002069    獐子岛
+   3     USZA300181   佐力药业
+   4     USZA003030   祖名股份
+   ...          ...    ...
+   5399  USHT688282  *ST导航
+   5400  USHT603963  *ST大药
+   5401  USZA300301  *ST长方
+   5402  USHT600083  *ST博信
+   5403  USHT603363  *ST傲农
+
+   [5404 rows x 2 columns]
+   Disconnected from the server.
+
+
+
+日k数据查询
+---------------
+
+.. code-block:: python
+
+      from thsdata import Quote, FuquanNo, KlineDay
+      import datetime
+
+
+      def main():
+          # 初始化
+          quote = Quote()
+
+          try:
+              # quote.connect()
+              start_date = datetime.datetime(2024, 1, 1)
+              end_date = datetime.datetime(2025, 2, 28)
+              data = quote.security_bars("USHA600519", start_date, end_date, FuquanNo, KlineDay)
+              print(data)
+
+          except Exception as e:
+              print("An error occurred:", e)
+
+          finally:
+              # 断开连接
+              quote.disconnect()
+              print("Disconnected from the server.")
+
+
+      if __name__ == "__main__":
+          main()
+
+
+
+
+.. code-block:: text
+
              time    close   volume    turnover     open     high      low
    0   2024-01-02  1685.01  3215644  5440082500  1715.00  1718.19  1678.10
    1   2024-01-03  1694.00  2022929  3411400700  1681.11  1695.22  1676.33
@@ -53,6 +111,5 @@ Here is a quick example of how to use the `thsdata` package:
    277 2025-02-28  1500.79  5612895  8475738200  1485.50  1528.38  1482.00
 
    [278 rows x 7 columns]
-   查询成功 数量: 278
    Disconnected from the server.
 

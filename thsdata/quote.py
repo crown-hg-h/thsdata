@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import datetime, time
 import random
 import pytz
+import requests
+import json
+from typing import List, Tuple
 
 
 def rand_instance(n: int) -> str:
@@ -85,33 +88,46 @@ class Quote:
             self._blockQuote.disconnect()
 
     def _zhu_query_data(self, req: str):
-        reply = self.zhuQuote.query_data(req)
-        if reply.err_code != 0:
-            print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
-            return
-        resp = reply.resp
-        df = pd.DataFrame(resp.data)
-        return df
+        try:
+            reply = self.zhuQuote.query_data(req)
+            if reply.err_code != 0:
+                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+                return pd.DataFrame()  # Return an empty DataFrame on error
+            resp = reply.resp
+            df = pd.DataFrame(resp.data)
+            return df
+
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+        return pd.DataFrame()  # Return an empty DataFrame on exception
 
     def _block_data(self, block_id: int):
-        reply = self.zhuQuote.get_block_data(block_id)
-        if reply.err_code != 0:
-            print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
-            return
-        resp = reply.resp
-        df = pd.DataFrame(resp.data)
-        return df
+        try:
+            reply = self.blockQuote.get_block_data(block_id)
+            if reply.err_code != 0:
+                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+                return pd.DataFrame()  # Return an empty DataFrame on error
+            resp = reply.resp
+            df = pd.DataFrame(resp.data)
+            return df
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame on exception
 
-    def _get_block_components(self, block_code: str):
-        reply = self.blockQuote.get_block_components(block_code)
-        if reply.err_code != 0:
-            print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
-            return
-        resp = reply.resp
-        df = pd.DataFrame(resp.data)
-        return df
+    def _get_block_components(self, block_code: str) -> pd.DataFrame:
+        try:
+            reply = self.blockQuote.get_block_components(block_code)
+            if reply.err_code != 0:
+                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+                return pd.DataFrame()  # Return an empty DataFrame on error
+            resp = reply.resp
+            df = pd.DataFrame(resp.data)
+            return df
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame on exception
 
-    def stock_codes(self):
+    def stock_codes(self) -> pd.DataFrame:
         """获取股票市场代码.
 
         :return: pandas.DataFrame
@@ -125,7 +141,7 @@ class Quote:
         """
         return self._block_data(0xC6A6)
 
-    def cbond_codes(self):
+    def cbond_codes(self) -> pd.DataFrame:
         """获取可转债市场代码.
 
         :return: pandas.DataFrame
@@ -139,7 +155,7 @@ class Quote:
         """
         return self._block_data(0xCE14)
 
-    def etf_codes(self):
+    def etf_codes(self) -> pd.DataFrame:
         """获取ETF基金市场代码.
 
         :return: pandas.DataFrame
@@ -153,7 +169,7 @@ class Quote:
         """
         return self._block_data(0xCFF3)
 
-    def security_bars(self, code: str, start: datetime, end: datetime, adjust: str, period: int):
+    def security_bars(self, code: str, start: datetime, end: datetime, adjust: str, period: int) -> pd.DataFrame:
         """获取指定证券的K线数据.
         支持日k线、周k线、月k线，以及5分钟、15分钟、30分钟和60分钟k线数据.
 
@@ -194,7 +210,7 @@ class Quote:
         resp = reply.resp
         return pd.DataFrame(resp.data)
 
-    def ths_industry_block(self):
+    def ths_industry_block(self) -> pd.DataFrame:
         """获取同花顺行业板块.
 
         :return: pandas.DataFrame
@@ -216,7 +232,7 @@ class Quote:
         """
         return self._block_data(0xCE5F)
 
-    def ths_industry_sub_block(self):
+    def ths_industry_sub_block(self) -> pd.DataFrame:
         """获取同花顺三级行业板块.
 
         :return: pandas.DataFrame
@@ -238,7 +254,7 @@ class Quote:
         """
         return self._block_data(0xc4b5)
 
-    def ths_concept_block(self):
+    def ths_concept_block(self) -> pd.DataFrame:
         """获取同花顺概念板块.
 
         :return: pandas.DataFrame
@@ -260,7 +276,7 @@ class Quote:
         """
         return self._block_data(0xCE5E)
 
-    def ths_block_components(self, block_code: str):
+    def ths_block_components(self, block_code: str) -> pd.DataFrame:
         """查询行业，行业三级，概念板块成分股.
 
         :param block_code: 板块代码，例如 'URFI881157'
@@ -280,7 +296,7 @@ class Quote:
         """
         return self._get_block_components(block_code)
 
-    def call_auction(self, code: str):
+    def call_auction(self, code: str) -> pd.DataFrame:
         """集合竞价
 
         :param code: 证券代码，例如 'USHA600519'
@@ -322,3 +338,76 @@ class Quote:
         data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
 
         return data
+
+    def wencai(self, condition: str) -> Tuple[List[str], Exception]:
+        """问财速查API.
+
+        :param condition: 条件选股
+        :return:
+        """
+
+        url = "https://eq.10jqka.com.cn/dataQuery/query"
+
+        # 定义请求头
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Referer": "https://eq.10jqka.com.cn/",  # 可选，模拟来源页面
+            "Connection": "keep-alive"
+        }
+
+        # Prepare query parameters
+        params = {"query": condition}
+
+        try:
+            # Make HTTP GET request
+            response = requests.get(url, params=params, headers=headers)
+            response.raise_for_status()  # Raise exception for bad status codes
+
+            # Parse JSON response
+            data = response.json()
+
+            # Check status_msg
+            if data.get("status_msg") != "success":
+                return None, Exception(data.get("status_msg"))
+
+            ret = []
+
+            # Get stockList array
+            stock_list = data.get("stockList", [])
+
+            # Iterate through stockList
+            for item in stock_list:
+                stock_code = item.get("stock_code", "")
+                market_id = item.get("marketid", "")
+
+                d = stock_code
+                if market_id == "17":
+                    d = "USHA" + d
+                    ret.append(d)
+                elif market_id == "21":
+                    d = "USHP" + d
+                    ret.append(d)
+                elif market_id == "22":
+                    d = "USHT" + d
+                    ret.append(d)
+                elif market_id == "33":
+                    d = "USZA" + d
+                    ret.append(d)
+                elif market_id == "37":
+                    d = "USZP" + d
+                    ret.append(d)
+                elif market_id == "151":
+                    d = "USTM" + d
+                    ret.append(d)
+                else:
+                    d = "todo" + d
+                    print(f"todo market {condition} {d}")
+
+            return ret, None
+
+        except requests.RequestException as e:
+            return [], e
+        except json.JSONDecodeError as e:
+            return [], e

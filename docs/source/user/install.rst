@@ -1,6 +1,6 @@
 .. _install:
 
-Installation of Thsdata
+Installation
 =======================
 
 This part of the documentation covers the installation of Thsdata.

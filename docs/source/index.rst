@@ -13,13 +13,23 @@ Thsdata documentation
 
 **Behold, the power of Requests**::
 
-      >>> from thsdata import BlockThsQuote
-      >>> quote = BlockThsQuote()
-      >>> quote.connect()
-      2025/03/02 09:22:54 hello thsdata!
-      Reply(err_code=0, err_message=游客登陆成功, data=Data(type=, data=[], dic_extra={}, extra=None))
-      >>> quote.get_block_data(0xCE5F)
-      Reply(err_code=0, err_message=, data=Data(type=db_file, data=[{'code': 'URFI881165', 'name': '综合'}, ...)
+      >>> from thsdata import Quote
+      >>> quote = Quote()
+      >>> quote.stock_codes()
+      2025/03/05 08:13:48 hello thsdata!
+            code   name
+      0     USTM832566    梓橦宫
+      1     USZA002346   柘中股份
+      2     USZA002069    獐子岛
+      3     USZA300181   佐力药业
+      4     USZA003030   祖名股份
+      ...          ...    ...
+      5399  USHT688282  *ST导航
+      5400  USHT603963  *ST大药
+      5401  USZA300301  *ST长方
+      5402  USHT600083  *ST博信
+      5403  USHT603363  *ST傲农
+      [5404 rows x 2 columns]
       >>> quote.disconnect()
 
 
