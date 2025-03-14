@@ -1,9 +1,9 @@
 .. _quickstart:
 
-Quickstart
+快速开始
 ==========
 
-Here is a quick example of how to use the `thsdata` package:
+下面是如何使用 `thsdata` 包的简单示例：
 
 
 证券代码查询

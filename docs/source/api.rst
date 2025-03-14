@@ -1,12 +1,10 @@
 .. _api:
 
-Developer Interface
+API文档
 ===================
 .. module:: thsdata
 
-This part of the documentation covers all the interfaces of Thsdata. For
-parts where Thsdata depends on external libraries, we document the most
-important right here and provide links to the canonical documentation.
+本部分文档涵盖了 Thsdata 的所有接口。对于 Thsdata 依赖外部库的部分，我们在此记录了最重要的部分，并提供了规范文档的链接。
 
 
 基础数据

@@ -3,40 +3,46 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Thsdata documentation
+Thsdata 文档说明
 =====================
 
 
-**Thsdata** is a Python library designed for querying and retrieving financial data.
+**Thsdata** 是基于Python开发的ths数据接口实现。
 
 -------------------
 
-**Behold, the power of Requests**::
+**Python快速开始Thsdata**::
 
       >>> from thsdata import Quote
       >>> quote = Quote()
       >>> quote.stock_codes()
-      2025/03/05 08:13:48 hello thsdata!
-            code   name
+      2025/03/14 09:11:30 Hello thsdk!
+                  code   name
       0     USTM832566    梓橦宫
       1     USZA002346   柘中股份
       2     USZA002069    獐子岛
       3     USZA300181   佐力药业
       4     USZA003030   祖名股份
       ...          ...    ...
-      5399  USHT688282  *ST导航
-      5400  USHT603963  *ST大药
-      5401  USZA300301  *ST长方
-      5402  USHT600083  *ST博信
-      5403  USHT603363  *ST傲农
-      [5404 rows x 2 columns]
+      5404  USZA300167  *ST迪威
+      5405  USHT688282  *ST导航
+      5406  USHT603963  *ST大药
+      5407  USZA300301  *ST长方
+      5408  USHT603363  *ST傲农
+
+      [5409 rows x 2 columns]
       >>> quote.disconnect()
 
 
-**Thsdata** provides an easy-to-use interface for accessing a wide range of financial information, including stock prices, market indices, historical data, and more. Whether you're a developer, data analyst, or financial researcher, Thsdata simplifies the process of integrating financial data into your applications or analyses.thanks to `thsdk <https://pypi.org/project/thsdata/>`_.
+**Thsdata** 提供ths的查询金融数据于行情数据.基于thsdk上的二次开发。thanks to `thsdk <https://pypi.org/project/thsdk/>`_.
 
 
-Beloved Features
+声明
+----------------
+次代码用于个人对网络协议的研究和习作，不对外提供服务，任何人使用本代码遇到问题请自行解决，也可以在github提issue给我，但是我不保证能即时处理。 由于我们连接的是既有的行情软件兼容行情服务器，机构请不要使用次代码，对此造成的任何问题本人概不负责
+
+
+功能速阅
 ----------------
 
 - 支持股票，可转债，基金市场行情数据
@@ -52,12 +58,10 @@ Beloved Features
 - 获取个股大宗交易数据
 
 
-The User Guide
+用户指南
 --------------
 
-This part of the documentation, which is mostly prose, begins with some
-background information about Requests, then focuses on step-by-step
-instructions for getting the most out of Requests.
+这部分内容为安装于案例使用。
 
 .. toctree::
    :maxdepth: 2
@@ -65,7 +69,7 @@ instructions for getting the most out of Requests.
    user/install
    user/quickstart
 
-The API Documentation / Guide
+API文档
 -----------------------------
 
 If you are looking for information on a specific function, class, or method,
