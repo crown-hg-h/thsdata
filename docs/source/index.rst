@@ -11,7 +11,7 @@ Thsdata 文档说明
 
 -------------------
 
-**Python快速开始Thsdata**::
+**Python使用Thsdata**::
 
       >>> from thsdata import Quote
       >>> quote = Quote()
@@ -34,12 +34,7 @@ Thsdata 文档说明
       >>> quote.disconnect()
 
 
-**Thsdata** 提供ths的查询金融数据于行情数据.基于thsdk上的二次开发。thanks to `thsdk <https://pypi.org/project/thsdk/>`_.
-
-
-声明
-----------------
-次代码用于个人对网络协议的研究和习作，不对外提供服务，任何人使用本代码遇到问题请自行解决，也可以在github提issue给我，但是我不保证能即时处理。 由于我们连接的是既有的行情软件兼容行情服务器，机构请不要使用次代码，对此造成的任何问题本人概不负责
+**Thsdata** 提供ths的查询金融数据和行情数据.基于thsdk上的二次开发.thanks to `thsdk <https://pypi.org/project/thsdk/>`_.
 
 
 功能速阅
@@ -56,6 +51,7 @@ Thsdata 文档说明
 - 获取个股研报数据
 - 获取个股龙虎榜数据
 - 获取个股大宗交易数据
+- 权息资料
 
 
 用户指南
@@ -79,3 +75,7 @@ this part of the documentation is for you.
    :maxdepth: 3
 
    api
+
+声明
+----------------
+次代码用于个人对网络协议的研究和习作，不对外提供服务，任何人使用本代码遇到问题请自行解决，也可以在github提issue给我，但是我不保证能即时处理。 由于我们连接的是既有的行情软件兼容行情服务器，机构请不要使用次代码，对此造成的任何问题本人概不负责

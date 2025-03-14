@@ -29,6 +29,7 @@ API文档
 
 .. automethod:: thsdata.Quote.security_bars
 .. automethod:: thsdata.Quote.call_auction
+.. automethod:: thsdata.Quote.corporate_action
 
 
 特色数据
