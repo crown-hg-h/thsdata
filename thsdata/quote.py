@@ -387,6 +387,28 @@ class Quote:
 
         return data
 
+    def level5_order_book(self, code: str) -> dict:
+        """5档盘口
+
+        :param code: 证券代码，例如 'USHA600519'
+        :type code: str
+
+        :return: dict
+
+        Example::
+            {'bid4': 1585, 'bid4_vol': 1900, 'ask4': 1586.3, 'ask4_vol': 200, 'bid5': 1584.92, 'bid5_vol': 100, 'ask5': 1586.6, 'ask5_vol': 100, 'bid1': 1585.21, 'bid1_vol': 2, 'bid2': 1585.2, 'bid2_vol': 100, 'bid3': 1585.01, 'bid3_vol': 400, 'ask1': 1585.62, 'ask1_vol': 1100, 'ask2': 1585.65, 'ask2_vol': 100, 'ask3': 1586, 'ask3_vol': 1400, 'code': 'USHA600519'}
+
+
+        """
+
+        market = code[:4]
+        short_code = code[4:]
+        req = f"id=200&instance={rand_instance(7)}&zipversion=2&codelist={short_code}&market={market}&datatype=24,25,26,27,28,29,150,151,154,155,30,31,32,33,34,35,152,153,156,157"
+
+        data = self._zhu_query_data(req)
+
+        return data.iloc[0].to_dict()
+
     def moneyflow_major(self, code: str) -> pd.DataFrame:
         # todo  https://zx.10jqka.com.cn/marketinfo/moneyflow/graph/major?code=600519&start=20250101&end=20250314
         pass
