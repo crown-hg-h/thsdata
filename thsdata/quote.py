@@ -387,6 +387,53 @@ class Quote:
 
         return data
 
+    def transaction_history(self, code: str, date: datetime) -> pd.DataFrame:
+        """tick3秒l1快照数据
+
+        :param code: 证券代码，例如 'USHA600519'
+        :type code: str
+
+        :param date: 指定日期
+        :type date: datetime
+
+        :return: pandas.DataFrame
+
+        Example::
+
+                                      time    price  ...  transaction_count  cur_volume
+            0    2025-04-11 09:15:06+08:00  1544.00  ...                  0         100
+            1    2025-04-11 09:15:09+08:00  1546.90  ...                  0         500
+            2    2025-04-11 09:15:12+08:00  1546.90  ...                  0         700
+            3    2025-04-11 09:15:15+08:00  1546.90  ...                  0         800
+            4    2025-04-11 09:15:18+08:00  1550.98  ...                  0        5500
+            ...                        ...      ...  ...                ...         ...
+            4842 2025-04-11 14:59:51+08:00  1565.30  ...              23044           0
+            4843 2025-04-11 14:59:54+08:00  1565.30  ...              23044           0
+            4844 2025-04-11 14:59:57+08:00  1565.30  ...              23044           0
+            4845 2025-04-11 15:00:00+08:00  1565.30  ...              23044           0
+            4846 2025-04-11 15:00:03+08:00  1568.98  ...              23616      159400
+        """
+        # 设置北京时间时区
+        beijing_tz = pytz.timezone('Asia/Shanghai')
+
+        # 构造当天的 09:15 和 15:30 时间
+        start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(beijing_tz)
+        end = datetime.combine(date.date(), time(15, 30, 0)).astimezone(beijing_tz)
+
+        # 转换为 Unix 时间戳（秒）
+        start_unix = int(start.timestamp())
+        end_unix = int(end.timestamp())
+
+        market = code[:4]
+        short_code = code[4:]
+        req = f"id=205&instance={rand_instance(7)}&zipversion=2&code={short_code}&market={market}&start={start_unix}&end={end_unix}&datatype=1,5,10,12,18,49&TraceDetail=0"
+
+        data = self._zhu_query_data(req)
+        beijing_tz = pytz.timezone('Asia/Shanghai')
+        data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
+
+        return data
+
     def level5_order_book(self, code: str) -> dict:
         """5档盘口
 

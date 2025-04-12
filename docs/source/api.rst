@@ -31,6 +31,7 @@ API文档
 .. automethod:: thsdata.Quote.call_auction
 .. automethod:: thsdata.Quote.corporate_action
 .. automethod:: thsdata.Quote.level5_order_book
+.. automethod:: thsdata.Quote.transaction_history
 
 
 特色数据
