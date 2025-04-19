@@ -79,6 +79,20 @@ class Quote:
         if self._blockQuote:
             self._blockQuote.disconnect()
 
+    def about(self):
+        about = "\n\nabout me: 本项目基于thsdk二次开发。仅用于个人对网络协议的研究和习作，不对外提供服务。请勿用于非法用途，对此造成的任何问题概不负责。 \n\n"
+
+        thsdk_about = "\n\n"
+        if self._zhuQuote:
+            thsdk_about = self._zhuQuote.about()
+        elif self._fuQuote:
+            thsdk_about = self._fuQuote.about()
+        elif self._infoQuote:
+            thsdk_about = self._infoQuote.about()
+        elif self._blockQuote:
+            thsdk_about = self._blockQuote.about()
+        return about
+
     def _zhu_query_data(self, req: str):
         try:
             reply = self.zhuQuote.query_data(req)
@@ -301,6 +315,72 @@ class Quote:
             48  USHA600906  财达证券
         """
         return self._get_block_components(block_code)
+
+    def stock_cur_market_data(self, codes: List[str]) -> pd.DataFrame:
+        """股票当前时刻市场数据
+
+        :param codes: 证券代码，例如 'USHA600519, USHA600036' 注意只能同一市场
+        :type codes: List[str]
+
+        :return: pandas.DataFrame
+
+        Example::
+                price  deal_type   volume  volume_ratio  ...  limit_down    high    low   开盘涨幅
+            0  669.54         21  4168728        0.5324  ...       541.6  677.31  663.1 -1.034
+
+
+        """
+
+        market = codes[0][:4]
+
+        # 检查所有代码是否属于同一市场
+        for code in codes:
+            if len(code) != 10:
+                raise ValueError("证券代码长度不足")
+            if code[:4] != market:
+                raise ValueError("只能同一市场的证券代码")
+
+        short_codes = [code[4:] for code in codes]  # 剔除前4位
+        short_code = ','.join(short_codes)  # 用逗号连接
+
+        req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=5,6,8,9,10,12,13,402,19,407,24,30,48,49,69,70,3250,920371,55,199112,264648,1968584,461256,1771976,3475914,3541450,526792,3153,592888,592890"
+
+        data = self._zhu_query_data(req)
+
+        return data
+
+    def cbond_cur_market_data(self, codes: List[str]) -> pd.DataFrame:
+        """可转债当前时刻市场数据
+
+        :param codes: 证券代码，例如 'USHD600519, USHD600036' 注意只能同一市场
+        :type codes: List[str]
+
+        :return: pandas.DataFrame
+
+        Example::
+                price  deal_type   volume  volume_ratio  ...  limit_down    high    low   开盘涨幅
+            0  669.54         21  4168728        0.5324  ...       541.6  677.31  663.1 -1.034
+
+
+        """
+
+        market = codes[0][:4]
+
+        # 检查所有代码是否属于同一市场
+        for code in codes:
+            if len(code) != 10:
+                raise ValueError("证券代码长度不足")
+            if code[:4] != market:
+                raise ValueError("只能同一市场的证券代码")
+
+        short_codes = [code[4:] for code in codes]  # 剔除前4位
+        short_code = ','.join(short_codes)  # 用逗号连接
+
+        req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=5,55,10,80,49,13,19,25,31,24,30,6,7,8,9,12,199112,264648,48,1771976,1968584,527527"
+
+        data = self._zhu_query_data(req)
+
+        return data
 
     def call_auction(self, code: str) -> pd.DataFrame:
         """集合竞价
