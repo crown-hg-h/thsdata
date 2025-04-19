@@ -8,21 +8,7 @@ import requests
 import json
 from typing import List, Tuple
 
-
-def rand_instance(n: int) -> str:
-    digits = "0123456789"
-    d2 = "123456789"  # d2 used for the first digit to avoid 0 at the start
-
-    if n <= 1:
-        return str(random.randint(0, 9))  # Return a single random digit
-
-    # Generate the string with n characters
-    result = [random.choice(digits) for _ in range(n)]
-
-    # Ensure the first digit is from d2 (i.e., 1-9)
-    result[0] = random.choice(d2)
-
-    return ''.join(result)
+beijing_tz = pytz.timezone('Asia/Shanghai')
 
 
 def time_2_int(t: datetime) -> int:
@@ -42,6 +28,12 @@ class Quote:
         self._fuQuote = None
         self._infoQuote = None
         self._blockQuote = None
+        self.__share_instance = random.randint(80000000, 99999999)
+
+    @property
+    def share_instance(self):
+        self.__share_instance += 1  # Increment on access
+        return self.__share_instance
 
     @property
     def zhuQuote(self):
@@ -199,6 +191,20 @@ class Quote:
             start_int = time_2_int(start)
             end_int = time_2_int(end)
         else:
+            if start.tzinfo is None:
+                # If naive, localize to Beijing timezone
+                start = beijing_tz.localize(start)
+            else:
+                # Convert to Beijing timezone
+                start = start.astimezone(beijing_tz)
+
+            if end.tzinfo is None:
+                # If naive, localize to Beijing timezone
+                end = beijing_tz.localize(end)
+            else:
+                # Convert to Beijing timezone
+                end = end.astimezone(beijing_tz)
+
             start_int = int(start.strftime('%Y%m%d'))
             end_int = int(end.strftime('%Y%m%d'))
 
@@ -331,10 +337,9 @@ class Quote:
         end_unix = int(end.timestamp())
         market = code[:4]
         short_code = code[4:]
-        req = f"id=204&instance={rand_instance(7)}&zipversion=2&code={short_code}&market={market}&datatype=1,10,27,33,49&start={start_unix}&end={end_unix}"
+        req = f"id=204&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&datatype=1,10,27,33,49&start={start_unix}&end={end_unix}"
 
         data = self._zhu_query_data(req)
-        beijing_tz = pytz.timezone('Asia/Shanghai')
         data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
 
         return data
@@ -381,7 +386,7 @@ class Quote:
 
         market = code[:4]
         short_code = code[4:]
-        req = f"id=211&instance={rand_instance(7)}&zipversion=2&code={short_code}&market={market}&start=-36500&end=0&fuquan=Q&datatype=471&period=16384"
+        req = f"id=211&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&start=-36500&end=0&fuquan=Q&datatype=471&period=16384"
 
         data = self._zhu_query_data(req)
 
@@ -413,8 +418,13 @@ class Quote:
             4845 2025-04-11 15:00:00+08:00  1565.30  ...              23044           0
             4846 2025-04-11 15:00:03+08:00  1568.98  ...              23616      159400
         """
-        # 设置北京时间时区
-        beijing_tz = pytz.timezone('Asia/Shanghai')
+        # Ensure the date is in Beijing timezone
+        if date.tzinfo is None:
+            # If naive, localize to Beijing timezone
+            date = beijing_tz.localize(date)
+        else:
+            # Convert to Beijing timezone
+            date = date.astimezone(beijing_tz)
 
         # 构造当天的 09:15 和 15:30 时间
         start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(beijing_tz)
@@ -426,10 +436,9 @@ class Quote:
 
         market = code[:4]
         short_code = code[4:]
-        req = f"id=205&instance={rand_instance(7)}&zipversion=2&code={short_code}&market={market}&start={start_unix}&end={end_unix}&datatype=1,5,10,12,18,49&TraceDetail=0"
+        req = f"id=205&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&start={start_unix}&end={end_unix}&datatype=1,5,10,12,18,49&TraceDetail=0"
 
         data = self._zhu_query_data(req)
-        beijing_tz = pytz.timezone('Asia/Shanghai')
         data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
 
         return data
@@ -450,7 +459,7 @@ class Quote:
 
         market = code[:4]
         short_code = code[4:]
-        req = f"id=200&instance={rand_instance(7)}&zipversion=2&codelist={short_code}&market={market}&datatype=24,25,26,27,28,29,150,151,154,155,30,31,32,33,34,35,152,153,156,157"
+        req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=24,25,26,27,28,29,150,151,154,155,30,31,32,33,34,35,152,153,156,157"
 
         data = self._zhu_query_data(req)
 
