@@ -65,7 +65,7 @@
 
 .. code-block:: python
 
-      from thsdata import Quote, FuquanNo, KlineDay
+      from thsdata import Quote, AdjustedType, KlinePeriod
       import datetime
 
 
@@ -77,7 +77,7 @@
               # quote.connect()
               start_date = datetime.datetime(2024, 1, 1)
               end_date = datetime.datetime(2025, 2, 28)
-              data = quote.security_bars("USHA600519", start_date, end_date, FuquanNo, KlineDay)
+              data = quote.security_bars("USHA600519", start_date, end_date, AdjustedType.NONE, KlinePeriod.DAY)
               print(data)
 
           except Exception as e:

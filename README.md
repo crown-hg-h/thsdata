@@ -9,7 +9,7 @@ pip install --upgrade thsdata
 # Usage
 
 ```python
-from thsdata import Quote, FuquanNo, KlineDay
+from thsdata import Quote, AdjustedType, KlinePeriod
 import datetime
 
 
@@ -21,8 +21,8 @@ def main():
         # quote.connect()
         # print(quote.about())
         start_date = datetime.datetime(2024, 1, 1)
-        end_date = datetime.datetime(2025, 2, 28)
-        data = quote.security_bars("USHA600519", start_date, end_date, FuquanNo, KlineDay)
+        end_date = datetime.datetime(2025, 4, 20)
+        data = quote.security_bars("USHA600519", start_date, end_date, AdjustedType.NONE, KlinePeriod.DAY)
         print(data)
 
     except Exception as e:

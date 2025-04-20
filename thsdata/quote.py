@@ -1,5 +1,4 @@
-from thsdk import ZhuThsQuote, FuThsQuote, InfoThsQuote, BlockThsQuote
-from thsdk.constants import *
+from thsdk import ZhuTHS, FuTHS, InfoTHS, BlockTHS
 import pandas as pd
 from datetime import datetime, time
 import random
@@ -8,7 +7,7 @@ import requests
 import json
 from typing import List, Tuple
 
-beijing_tz = pytz.timezone('Asia/Shanghai')
+china_tz = pytz.timezone('Asia/Shanghai')
 
 
 def time_2_int(t: datetime) -> int:
@@ -38,28 +37,28 @@ class Quote:
     @property
     def zhuQuote(self):
         if self._zhuQuote is None:
-            self._zhuQuote = ZhuThsQuote(self.ops)
+            self._zhuQuote = ZhuTHS(self.ops)
             self._zhuQuote.connect()
         return self._zhuQuote
 
     @property
     def fuQuote(self):
         if self._fuQuote is None:
-            self._fuQuote = FuThsQuote(self.ops)
+            self._fuQuote = FuTHS(self.ops)
             self._fuQuote.connect()
         return self._fuQuote
 
     @property
     def infoQuote(self):
         if self._infoQuote is None:
-            self._infoQuote = InfoThsQuote(self.ops)
+            self._infoQuote = InfoTHS(self.ops)
             self._infoQuote.connect()
         return self._infoQuote
 
     @property
     def blockQuote(self):
         if self._blockQuote is None:
-            self._blockQuote = BlockThsQuote(self.ops)
+            self._blockQuote = BlockTHS(self.ops)
             self._blockQuote.connect()
         return self._blockQuote
 
@@ -185,9 +184,9 @@ class Quote:
         :type start: datetime.datetime
         :param end: 结束时间，格式为 datetime 对象
         :type end: datetime.datetime
-        :param adjust: 复权类型， :const:`Fuquanqian`, :const:`Fuquanhou`, :const:`FuquanNo`
+        :param adjust: 复权类型， :const:`Q`, :const:`B`, :const:``
         :type adjust: str
-        :param period: 数据类型， :const:`Kline1m`, :const:`Kline5m`, :const:`Kline15m`, :const:`Kline30m`, :const:`Kline60m`, :const:`Kline120m`, :const:`KlineDay`, :const:`KlineWeek`, :const:`KlineMoon`, :const:`KlineQuarterly`, :const:`KlineYear`
+        :param period: 数据类型，
         :type period: int
 
         :return: pandas.DataFrame
@@ -199,7 +198,7 @@ class Quote:
             2024-01-03  1694.00  2022929  3411400700  1681.11  1695.22  1676.33
             2024-01-04  1669.00  2155107  3603970100  1693.00  1693.00  1662.93
         """
-        m_period = {Kline1m, Kline5m, Kline15m, Kline30m, Kline60m, Kline120m}
+        m_period = {0x3001, 0x3005, 0x300f, 0x301e, 0x303c, 0x3078, }
 
         if period in m_period:
             start_int = time_2_int(start)
@@ -207,17 +206,17 @@ class Quote:
         else:
             if start.tzinfo is None:
                 # If naive, localize to Beijing timezone
-                start = beijing_tz.localize(start)
+                start = china_tz.localize(start)
             else:
                 # Convert to Beijing timezone
-                start = start.astimezone(beijing_tz)
+                start = start.astimezone(china_tz)
 
             if end.tzinfo is None:
                 # If naive, localize to Beijing timezone
-                end = beijing_tz.localize(end)
+                end = china_tz.localize(end)
             else:
                 # Convert to Beijing timezone
-                end = end.astimezone(beijing_tz)
+                end = end.astimezone(china_tz)
 
             start_int = int(start.strftime('%Y%m%d'))
             end_int = int(end.strftime('%Y%m%d'))
@@ -420,7 +419,7 @@ class Quote:
         req = f"id=204&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&datatype=1,10,27,33,49&start={start_unix}&end={end_unix}"
 
         data = self._zhu_query_data(req)
-        data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
+        data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(china_tz)
 
         return data
 
@@ -501,14 +500,14 @@ class Quote:
         # Ensure the date is in Beijing timezone
         if date.tzinfo is None:
             # If naive, localize to Beijing timezone
-            date = beijing_tz.localize(date)
+            date = china_tz.localize(date)
         else:
             # Convert to Beijing timezone
-            date = date.astimezone(beijing_tz)
+            date = date.astimezone(china_tz)
 
         # 构造当天的 09:15 和 15:30 时间
-        start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(beijing_tz)
-        end = datetime.combine(date.date(), time(15, 30, 0)).astimezone(beijing_tz)
+        start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(china_tz)
+        end = datetime.combine(date.date(), time(15, 30, 0)).astimezone(china_tz)
 
         # 转换为 Unix 时间戳（秒）
         start_unix = int(start.timestamp())
@@ -519,7 +518,7 @@ class Quote:
         req = f"id=205&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&start={start_unix}&end={end_unix}&datatype=1,5,10,12,18,49&TraceDetail=0"
 
         data = self._zhu_query_data(req)
-        data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(beijing_tz)
+        data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(china_tz)
 
         return data
 
