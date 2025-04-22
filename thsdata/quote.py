@@ -1,13 +1,65 @@
-from thsdk import ZhuTHS, FuTHS, InfoTHS, BlockTHS
-import pandas as pd
-from datetime import datetime, time
-import random
 import pytz
-import requests
 import json
+import random
+import requests
+import datetime
+import pandas as pd
 from typing import List, Tuple
 
+from thsdk import THS
+
 china_tz = pytz.timezone('Asia/Shanghai')
+
+
+class Adjust:
+    """Class to represent adjustment types for stock data."""
+    FORWARD = "Q"  # 前复权
+    BACKWARD = "B"  # 后复权
+    NONE = ""  # 不复权
+
+    @classmethod
+    def all_types(cls):
+        """Return all adjustment types as a list."""
+        return [cls.FORWARD, cls.BACKWARD, cls.NONE]
+
+
+class Interval:
+    """Class to represent Kline period types."""
+    MIN_1 = 0x3001  # 1分钟k
+    MIN_5 = 0x3005  # 5分钟k
+    MIN_15 = 0x300f  # 15分钟k
+    MIN_30 = 0x301e  # 30分钟k
+    MIN_60 = 0x303c  # 60分钟k
+    MIN_120 = 0x3078  # 120分钟k
+    DAY = 0x4000  # 日k
+    WEEK = 0x5001  # 周k
+    MONTH = 0x6001  # 月k
+    QUARTER = 0x6003  # 季k
+    YEAR = 0x7001  # 年k
+
+    @classmethod
+    def minute_intervals(cls):
+        """Return all minute-level intervals."""
+        return [
+            cls.MIN_1, cls.MIN_5, cls.MIN_15, cls.MIN_30,
+            cls.MIN_60, cls.MIN_120
+        ]
+
+    @classmethod
+    def day_and_above_intervals(cls):
+        """Return all day-level and above intervals."""
+        return [
+            cls.DAY, cls.WEEK, cls.MONTH,
+            cls.QUARTER, cls.YEAR
+        ]
+
+    @classmethod
+    def all_types(cls):
+        """Return all Kline period types as a list."""
+        return [
+            cls.MIN_1, cls.MIN_5, cls.MIN_15, cls.MIN_30, cls.MIN_60, cls.MIN_120,
+            cls.DAY, cls.WEEK, cls.MONTH, cls.QUARTER, cls.YEAR
+        ]
 
 
 def time_2_int(t: datetime) -> int:
@@ -23,10 +75,10 @@ def time_2_int(t: datetime) -> int:
 class Quote:
     def __init__(self, ops: dict = None):
         self.ops = ops
-        self._zhuQuote = None
-        self._fuQuote = None
-        self._infoQuote = None
-        self._blockQuote = None
+        self._zhu_quote = None
+        self._fu_quote = None
+        self._zx_quote = None
+        self._bk_quote = None
         self.__share_instance = random.randint(80000000, 99999999)
 
     @property
@@ -35,66 +87,72 @@ class Quote:
         return self.__share_instance
 
     @property
-    def zhuQuote(self):
-        if self._zhuQuote is None:
-            self._zhuQuote = ZhuTHS(self.ops)
-            self._zhuQuote.connect()
-        return self._zhuQuote
+    def main_quote(self):
+        if self._zhu_quote is None:
+            self._zhu_quote = THS(self.ops)
+            self._zhu_quote.connect()
+        return self._zhu_quote
 
     @property
-    def fuQuote(self):
-        if self._fuQuote is None:
-            self._fuQuote = FuTHS(self.ops)
-            self._fuQuote.connect()
-        return self._fuQuote
+    def secondary_quote(self):
+        if self._fu_quote is None:
+            addr = "default_fu_addr"
+            ops_with_addr = {**self.ops, "addr": addr} if self.ops else {"addr": addr}
+            self._fu_quote = THS(ops_with_addr)
+            self._fu_quote.connect()
+        return self._fu_quote
 
     @property
-    def infoQuote(self):
-        if self._infoQuote is None:
-            self._infoQuote = InfoTHS(self.ops)
-            self._infoQuote.connect()
-        return self._infoQuote
+    def info_quote(self):
+        if self._zx_quote is None:
+            addr = "default_info_addr"
+            ops_with_addr = {**self.ops, "addr": addr} if self.ops else {"addr": addr}
+            self._zx_quote = THS(ops_with_addr)
+            self._zx_quote.connect()
+        return self._zx_quote
 
     @property
-    def blockQuote(self):
-        if self._blockQuote is None:
-            self._blockQuote = BlockTHS(self.ops)
-            self._blockQuote.connect()
-        return self._blockQuote
+    def block_quote(self):
+        if self._bk_quote is None:
+            addr = "default_block_addr"
+            ops_with_addr = {**self.ops, "addr": addr} if self.ops else {"addr": addr}
+            self._bk_quote = THS(ops_with_addr)
+            self._bk_quote.connect()
+        return self._bk_quote
 
     def connect(self):
-        self.zhuQuote.connect()
-        self.fuQuote.connect()
-        self.infoQuote.connect()
-        self.blockQuote.connect()
+        self.main_quote.connect()
+        self.secondary_quote.connect()
+        self.info_quote.connect()
+        self.block_quote.connect()
 
     def disconnect(self):
-        if self._zhuQuote:
-            self._zhuQuote.disconnect()
-        if self._fuQuote:
-            self._fuQuote.disconnect()
-        if self._infoQuote:
-            self._infoQuote.disconnect()
-        if self._blockQuote:
-            self._blockQuote.disconnect()
+        if self._zhu_quote:
+            self._zhu_quote.disconnect()
+        if self._fu_quote:
+            self._fu_quote.disconnect()
+        if self._zx_quote:
+            self._zx_quote.disconnect()
+        if self._bk_quote:
+            self._bk_quote.disconnect()
 
     def about(self):
         about = "\n\nabout me: 本项目基于thsdk二次开发。仅用于个人对网络协议的研究和习作，不对外提供服务。请勿用于非法用途，对此造成的任何问题概不负责。 \n\n"
 
         thsdk_about = "\n\n"
-        if self._zhuQuote:
-            thsdk_about = self._zhuQuote.about()
-        elif self._fuQuote:
-            thsdk_about = self._fuQuote.about()
-        elif self._infoQuote:
-            thsdk_about = self._infoQuote.about()
-        elif self._blockQuote:
-            thsdk_about = self._blockQuote.about()
+        if self._zhu_quote:
+            thsdk_about = self._zhu_quote.about()
+        elif self._fu_quote:
+            thsdk_about = self._fu_quote.about()
+        elif self._zx_quote:
+            thsdk_about = self._zx_quote.about()
+        elif self._bk_quote:
+            thsdk_about = self._bk_quote.about()
         return about
 
-    def _zhu_query_data(self, req: str):
+    def _main_quote_query_data(self, req: str):
         try:
-            reply = self.zhuQuote.query_data(req)
+            reply = self.main_quote.query_data(req)
             if reply.err_code != 0:
                 print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
@@ -108,7 +166,7 @@ class Quote:
 
     def _block_data(self, block_id: int):
         try:
-            reply = self.blockQuote.get_block_data(block_id)
+            reply = self.block_quote.get_block_data(block_id)
             if reply.err_code != 0:
                 print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
@@ -121,7 +179,7 @@ class Quote:
 
     def _get_block_components(self, block_code: str) -> pd.DataFrame:
         try:
-            reply = self.blockQuote.get_block_components(block_code)
+            reply = self.block_quote.get_block_components(block_code)
             if reply.err_code != 0:
                 print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
@@ -221,7 +279,7 @@ class Quote:
             start_int = int(start.strftime('%Y%m%d'))
             end_int = int(end.strftime('%Y%m%d'))
 
-        reply = self.zhuQuote.security_bars(code, start_int, end_int, adjust, period)
+        reply = self.main_quote.security_bars(code, start_int, end_int, adjust, period)
         if reply.err_code != 0:
             print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
             return
@@ -344,7 +402,7 @@ class Quote:
 
         req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=5,6,8,9,10,12,13,402,19,407,24,30,48,49,69,70,3250,920371,55,199112,264648,1968584,461256,1771976,3475914,3541450,526792,3153,592888,592890"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
 
         return data
 
@@ -377,7 +435,7 @@ class Quote:
 
         req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=5,55,10,80,49,13,19,25,31,24,30,6,7,8,9,12,199112,264648,48,1771976,1968584,527527"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
 
         return data
 
@@ -406,10 +464,10 @@ class Quote:
 
         """
 
-        now = datetime.now()
+        now = datetime.datetime.now()
         # 使用当前日期，构造当天的 9:15:00 和 9:25:00
-        start = datetime.combine(now.date(), time(9, 15, 0))  # 9:15:00
-        end = datetime.combine(now.date(), time(9, 25, 0))  # 9:25:00
+        start = datetime.datetime.combine(now.date(), datetime.time(9, 15, 0))  # 9:15:00
+        end = datetime.datetime.combine(now.date(), datetime.time(9, 25, 0))  # 9:25:00
 
         # 获取 Unix 时间戳（秒）
         start_unix = int(start.timestamp())
@@ -418,7 +476,7 @@ class Quote:
         short_code = code[4:]
         req = f"id=204&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&datatype=1,10,27,33,49&start={start_unix}&end={end_unix}"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
         data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(china_tz)
 
         return data
@@ -467,7 +525,7 @@ class Quote:
         short_code = code[4:]
         req = f"id=211&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&start=-36500&end=0&fuquan=Q&datatype=471&period=16384"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
 
         return data
 
@@ -506,8 +564,8 @@ class Quote:
             date = date.astimezone(china_tz)
 
         # 构造当天的 09:15 和 15:30 时间
-        start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(china_tz)
-        end = datetime.combine(date.date(), time(15, 30, 0)).astimezone(china_tz)
+        start = datetime.datetime.combine(date.date(), datetime.time(9, 15, 0)).astimezone(china_tz)
+        end = datetime.datetime.combine(date.date(), datetime.time(15, 30, 0)).astimezone(china_tz)
 
         # 转换为 Unix 时间戳（秒）
         start_unix = int(start.timestamp())
@@ -517,7 +575,7 @@ class Quote:
         short_code = code[4:]
         req = f"id=205&instance={self.share_instance}&zipversion=2&code={short_code}&market={market}&start={start_unix}&end={end_unix}&datatype=1,5,10,12,18,49&TraceDetail=0"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
         data['time'] = pd.to_datetime(data['time'], unit='s').dt.tz_localize('UTC').dt.tz_convert(china_tz)
 
         return data
@@ -540,7 +598,7 @@ class Quote:
         short_code = code[4:]
         req = f"id=200&instance={self.share_instance}&zipversion=2&codelist={short_code}&market={market}&datatype=24,25,26,27,28,29,150,151,154,155,30,31,32,33,34,35,152,153,156,157"
 
-        data = self._zhu_query_data(req)
+        data = self._main_quote_query_data(req)
 
         return data.iloc[0].to_dict()
 
@@ -620,3 +678,19 @@ class Quote:
             return [], e
         except json.JSONDecodeError as e:
             return [], e
+
+    def download(self, code: str, start=None, end=None, adjust=Adjust.NONE, period="max", interval=Interval.DAY,
+                 count=-1) -> pd.DataFrame:
+        """
+               获取历史k线数据。
+
+               :param period:  str max
+               :param code: 证券代码，必须是10个字符长，并以'USHA'或'USZA'开头。
+               :param count: 需要的数量，推荐使用此参数
+               :param start: 开始时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
+               :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
+               :param adjust: 复权类型，必须是有效的复权值之一。
+               :param interval: 周期类型，必须是有效的周期值之一。
+               """
+
+        return self.main_quote.download(code, start, end, adjust, period, interval, count)

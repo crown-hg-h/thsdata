@@ -27,6 +27,7 @@ API文档
 行情数据
 --------------------
 
+.. automethod:: thsdata.Quote.download
 .. automethod:: thsdata.Quote.security_bars
 .. automethod:: thsdata.Quote.call_auction
 .. automethod:: thsdata.Quote.corporate_action
