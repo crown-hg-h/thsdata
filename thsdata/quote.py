@@ -5,6 +5,7 @@ import requests
 import datetime
 import pandas as pd
 from typing import List, Tuple
+from datetime import datetime, time
 
 from thsdk import THS
 
@@ -464,10 +465,10 @@ class Quote:
 
         """
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         # 使用当前日期，构造当天的 9:15:00 和 9:25:00
-        start = datetime.datetime.combine(now.date(), datetime.time(9, 15, 0))  # 9:15:00
-        end = datetime.datetime.combine(now.date(), datetime.time(9, 25, 0))  # 9:25:00
+        start = datetime.combine(now.date(), time(9, 15, 0))  # 9:15:00
+        end = datetime.combine(now.date(), time(9, 25, 0))  # 9:25:00
 
         # 获取 Unix 时间戳（秒）
         start_unix = int(start.timestamp())
@@ -564,8 +565,8 @@ class Quote:
             date = date.astimezone(china_tz)
 
         # 构造当天的 09:15 和 15:30 时间
-        start = datetime.datetime.combine(date.date(), datetime.time(9, 15, 0)).astimezone(china_tz)
-        end = datetime.datetime.combine(date.date(), datetime.time(15, 30, 0)).astimezone(china_tz)
+        start = datetime.combine(date.date(), time(9, 15, 0)).astimezone(china_tz)
+        end = datetime.combine(date.date(), time(15, 30, 0)).astimezone(china_tz)
 
         # 转换为 Unix 时间戳（秒）
         start_unix = int(start.timestamp())
