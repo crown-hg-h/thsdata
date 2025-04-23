@@ -7,10 +7,10 @@ API文档
 本部分文档涵盖了 Thsdata 的所有接口。对于 Thsdata 依赖外部库的部分，我们在此记录了最重要的部分，并提供了规范文档的链接。
 
 
-快速使用
+导出历史
 --------------------
 
-.. automethod:: thsdata.download
+.. autofunction:: thsdata.download
 
 
 基础数据
