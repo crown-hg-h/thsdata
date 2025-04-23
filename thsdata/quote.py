@@ -122,10 +122,10 @@ class Quote:
         return self._bk_quote
 
     def connect(self):
-        self.main_quote.connect()
-        self.secondary_quote.connect()
-        self.info_quote.connect()
-        self.block_quote.connect()
+        self.main_quote
+        self.secondary_quote
+        self.info_quote
+        self.block_quote
 
     def disconnect(self):
         if self._zhu_quote:

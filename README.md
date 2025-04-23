@@ -8,39 +8,18 @@ pip install --upgrade thsdata
 
 # Usage
 
+三行代码快速开始
 ```python
-from thsdata import Quote
+import thsdata as td
 
-
-def main():
-    # 初始化
-    quote = Quote()
-
-    try:
-        # quote.connect()
-        # print(quote.about())
-        # data = quote.download("USHA600519")
-        data = quote.download("USHA600519", count=100)
-        print(data)
-
-    except Exception as e:
-        print("An error occurred:", e)
-
-    finally:
-        # 断开连接
-        quote.disconnect()
-        print("Disconnected from the server.")
-
-
-if __name__ == "__main__":
-    main()
+data = td.download("USHA600519", start=20240101, end=20250101)
+print(data)
 
 ```
 
 result:
 
 ```
-2025/04/22 23:40:38 Hello thsdk!
           time    close   volume    turnover     open     high      low
 0   2024-11-21  1545.13  1826179  2810933500  1543.87  1548.99  1532.00
 1   2024-11-22  1507.82  3343611  5107289000  1541.15  1547.77  1507.82
@@ -54,6 +33,5 @@ result:
 99  2025-04-21  1551.00  1805703  2808158200  1565.50  1565.50  1551.00
 100 2025-04-22  1548.80  1843214  2857526000  1550.00  1556.30  1543.21
 
-[278 rows x 7 columns]
-Disconnected from the server.
+[101 rows x 7 columns]
 ```

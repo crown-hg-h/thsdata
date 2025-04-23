@@ -5,6 +5,37 @@
 
 下面是如何使用 `thsdata` 包的简单示例：
 
+快速入门使用
+--------------------
+
+.. code-block:: python
+
+        import thsdata as td
+
+        data = td.download("USHA600519", start="2024-01-01", end="2025-01-01")
+        print(data)
+
+
+
+
+
+.. code-block:: text
+
+              time    close   volume    turnover     open     high      low
+    0   2024-01-02  1685.01  3215644  5440082500  1715.00  1718.19  1678.10
+    1   2024-01-03  1694.00  2022929  3411400700  1681.11  1695.22  1676.33
+    2   2024-01-04  1669.00  2155107  3603970100  1693.00  1693.00  1662.93
+    3   2024-01-05  1663.36  2024286  3373155600  1661.33  1678.66  1652.11
+    4   2024-01-08  1643.99  2558620  4211918600  1661.00  1662.00  1640.01
+    ..         ...      ...      ...         ...      ...      ...      ...
+    237 2024-12-25  1530.00  1712339  2621061900  1538.80  1538.80  1526.10
+    238 2024-12-26  1527.79  1828651  2798840000  1534.00  1538.78  1523.00
+    239 2024-12-27  1528.97  2075932  3170191400  1528.90  1536.00  1519.50
+    240 2024-12-30  1525.00  2512982  3849542600  1533.97  1543.96  1525.00
+    241 2024-12-31  1524.00  3935445  6033540400  1525.40  1545.00  1522.01
+
+    [242 rows x 7 columns]
+
 
 证券代码查询
 --------------------
@@ -60,7 +91,7 @@
 
 
 
-日k数据查询
+quote查询日k数据
 ---------------
 
 .. code-block:: python
@@ -112,4 +143,59 @@
 
    [278 rows x 7 columns]
    Disconnected from the server.
+
+
+
+行业概念查询
+---------------
+
+.. code-block:: python
+
+        from thsdata import Quote
+
+        def main():
+            # 初始化
+            quote = Quote()
+
+            try:
+                # quote.connect()
+                # print(quote.about())
+                # data = quote.download("USHA600519")
+                data = quote.ths_industry_block()
+                print(data)
+
+            except Exception as e:
+                print("An error occurred:", e)
+
+            finally:
+                # 断开连接
+                quote.disconnect()
+                print("Disconnected from the server.")
+
+
+        if __name__ == "__main__":
+            main()
+
+
+
+
+
+
+.. code-block:: text
+
+              code   name
+    0   URFI881165     综合
+    1   URFI881171  自动化设备
+    2   URFI881118   专用设备
+    3   URFI881141     中药
+    4   URFI881157     证券
+    ..         ...    ...
+    85  URFI881138   包装印刷
+    86  URFI881121    半导体
+    87  URFI881131   白色家电
+    88  URFI881273     白酒
+    89  URFI881271   IT服务
+
+    [90 rows x 2 columns]
+    Disconnected from the server.
 
