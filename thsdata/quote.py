@@ -72,7 +72,7 @@ def _isdigit2code(code: str) -> str:
     :raises ValueError: If the code is not 6 digits or does not match any known prefix.
     """
     if not code.isdigit() or len(code) != 6:
-        raise ValueError("证券代码必须是6位数字")
+        raise ValueError("证券数字代码必须是6位数字")
 
     if code.startswith(("688", "60")):  # 沪
         market = "USHA"
@@ -741,20 +741,27 @@ class Quote:
 
         if len(code) == 6:
             code = _isdigit2code(code)
-
-        if len(code) == 8:
+        elif len(code) == 8:
             if code.startswith(("SH", "SZ")):
                 code = _isdigit2code(code[2:])
+            elif code.endswith(("SH", "SZ")):
+                code = _isdigit2code(code[:6])
             else:
-                raise ValueError("7位代码必须以SH或SZ开头，例如 'SH600519' 或 'SZ000001'")
-
+                raise ValueError(
+                    "8位代码必须以SH或SZ开头或者结尾，例如 'SH600519' 或 'SZ000001'， '600519SH' 或 '000001SZ'")
         elif len(code) == 9:
             if code.endswith((".SH", ".SZ")):
                 code = _isdigit2code(code[:6])
             else:
-                raise ValueError("8位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
+                raise ValueError("9位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
 
-        if len(code) == 10:
-            code = code.upper()
+        code = code.upper()
 
-        return self.main_quote.download(code, start, end, adjust, period, interval, count)
+        data = self.main_quote.download(code, start, end, adjust, period, interval, count)
+
+        # 指定列顺序
+        desired_columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'turnover']
+        if all(col in data.columns for col in desired_columns):
+            data = data[desired_columns]
+
+        return data
