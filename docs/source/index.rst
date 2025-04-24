@@ -14,7 +14,7 @@ Thsdata 文档说明
 **Python使用Thsdata**::
 
       >>> import thsdata as td
-      >>> td.download("USHA600519", start="2024-01-01", end="2025-01-01")
+      >>> td.download("600519", start="2024-01-01", end="2025-01-01")
       2025/04/23 08:22:04 Hello thsdk!
                 time    close   volume    turnover     open     high      low
       0   2024-01-02  1685.01  3215644  5440082500  1715.00  1718.19  1678.10

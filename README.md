@@ -12,7 +12,7 @@ pip install --upgrade thsdata
 ```python
 import thsdata as td
 
-data = td.download("USHA600519", start=20240101, end=20250101)
+data = td.download("600519", start=20240101, end=20250101)
 print(data)
 
 ```

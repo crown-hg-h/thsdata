@@ -63,6 +63,37 @@ class Interval:
         ]
 
 
+def _isdigit2code(code: str) -> str:
+    """
+    Convert a 6-digit stock code to a 10-character code with a market prefix.
+
+    :param code: A 6-digit stock code (e.g., '600519').
+    :return: A 10-character code with the market prefix (e.g., 'USHA600519').
+    :raises ValueError: If the code is not 6 digits or does not match any known prefix.
+    """
+    if not code.isdigit() or len(code) != 6:
+        raise ValueError("证券代码必须是6位数字")
+
+    if code.startswith(("688", "60")):  # 沪
+        market = "USHA"
+    elif code.startswith(("300", "00")):  # 深
+        market = "USZA"
+    elif code.startswith(("8", "4", "9")):  # 京
+        market = "USTM"
+    elif code.startswith("11"):  # 深可转债
+        market = "USZD"
+    elif code.startswith("12"):  # 沪可转债
+        market = "USHD"
+    elif code.startswith("5"):  # 沪基金
+        market = "USHJ"
+    elif code.startswith("15"):  # 深基金
+        market = "USZJ"
+    else:
+        raise ValueError("未知的证券代码前缀")
+
+    return market + code
+
+
 def time_2_int(t: datetime) -> int:
     dst = (t.minute +
            (t.hour << 6) +
@@ -685,7 +716,11 @@ class Quote:
         """获取历史k线数据。
 
        :param period:  str max
-       :param code: 证券代码，必须是10个字符长，并以'USHA'或'USZA'开头。
+       :param code: 证券代码，支持格式
+                    6位数字代码:600519;
+                    8位缩写市场和数字代码:sh600519;
+                    9位缩写尾部市场和数字代码:600519.sh
+                    10个字符标准ths格式代码(前4位指定市场market，比如并以'USHA'或'USZA'开头):USHA600519
        :param count: 需要的数量，推荐使用此参数
        :param start: 开始时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
        :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
@@ -701,5 +736,29 @@ class Quote:
             2024-01-03  1694.00  2022929  3411400700  1681.11  1695.22  1676.33
             2024-01-04  1669.00  2155107  3603970100  1693.00  1693.00  1662.93
         """
+
+        code = code.upper()
+
+        if len(code) == 6:
+            code = _isdigit2code(code)
+
+        if len(code) == 8:
+            if code.startswith(("SH", "SZ")):
+                code = _isdigit2code(code[2:])
+            else:
+                raise ValueError("7位代码必须以SH或SZ开头，例如 'SH600519' 或 'SZ000001'")
+            code = _isdigit2code(code)
+
+        elif len(code) == 9:
+            if code.endswith((".SH", ".SZ")):
+                code = _isdigit2code(code[:6])
+
+            else:
+                raise ValueError("8位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
+
+        if len(code) == 10:
+            code = code.upper()
+
+        print(code)
 
         return self.main_quote.download(code, start, end, adjust, period, interval, count)

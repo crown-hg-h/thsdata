@@ -10,7 +10,11 @@ def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", 
     """获取历史k线数据。
 
    :param period:  str max
-   :param code: 证券代码，必须是10个字符长，并以'USHA'或'USZA'开头。
+   :param code: 证券代码，支持格式
+                    6位数字代码:600519;
+                    8位缩写市场和数字代码:sh600519;
+                    9位缩写尾部市场和数字代码:600519.sh
+                    10个字符标准ths格式代码(前4位指定市场market，比如并以'USHA'或'USZA'开头):USHA600519
    :param count: 需要的数量，推荐使用此参数
    :param start: 开始时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
    :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
