@@ -747,18 +747,14 @@ class Quote:
                 code = _isdigit2code(code[2:])
             else:
                 raise ValueError("7位代码必须以SH或SZ开头，例如 'SH600519' 或 'SZ000001'")
-            code = _isdigit2code(code)
 
         elif len(code) == 9:
             if code.endswith((".SH", ".SZ")):
                 code = _isdigit2code(code[:6])
-
             else:
                 raise ValueError("8位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
 
         if len(code) == 10:
             code = code.upper()
-
-        print(code)
 
         return self.main_quote.download(code, start, end, adjust, period, interval, count)
