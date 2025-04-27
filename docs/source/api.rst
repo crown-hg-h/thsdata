@@ -37,7 +37,7 @@ API文档
 .. automethod:: thsdata.Quote.security_bars
 .. automethod:: thsdata.Quote.call_auction
 .. automethod:: thsdata.Quote.corporate_action
-.. automethod:: thsdata.Quote.level5_order_book
+.. automethod:: thsdata.Quote.order_book
 .. automethod:: thsdata.Quote.transaction_history
 .. automethod:: thsdata.Quote.stock_cur_market_data
 .. automethod:: thsdata.Quote.cbond_cur_market_data

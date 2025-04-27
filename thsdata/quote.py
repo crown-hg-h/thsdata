@@ -612,7 +612,7 @@ class Quote:
 
         return data
 
-    def level5_order_book(self, code: str) -> dict:
+    def order_book(self, code: str) -> dict:
         """5档盘口
 
         :param code: 证券代码，例如 'USHA600519'
@@ -645,6 +645,67 @@ class Quote:
         :return:
         """
 
+        """
+        <高定价权的绩优股>
+        
+        策略介绍
+        公司具备良好的市场定价权，经营能力优秀，上市2年以上经过市场反复检验，业绩持续保持高速增长，具备持续盈利的能力，内在价值将不断提升。
+        
+        策略问句
+        连续2年营业收入增长率大于16%，连续2年扣非净利润增长率大于15%，连续两年净资产收益率大于4，连续8个季度销售毛利率大于50%，连续8个季度净利润大于0，连续2年净利润增长率大于15%股价大于40，上市两年以上
+        
+        <主力资金做多中小盘>
+        
+        策略介绍
+        跟踪主力资金动向选股往往可以让普通投资者一同喝汤吃肉，我们通过分析主力手法，提前在中盘股中精选主力看好个股。
+        
+        策略问句
+        非st，非科创板，非退市，非停牌，流通市值大于5亿元，非同花顺，近1个月有>=1次的减持公告取反，今日曾涨停股且DDE排列前30位以内，主力持仓线上移，流通值<100亿元，大单净量翻红，剔除ST,流通值<100亿，股价<40元
+        
+        <触底反弹看涨股>
+        
+        策略介绍
+        前期已经跌出黄金坑，形态上向上突破半年线，并且量能配合良好，上升通道已经打开，中线趋势向上，具备良好的投资价值
+        
+        策略问句
+        昨天股价上穿120均线，前20个交易日跌幅大于4%，昨天放量上涨，今天高开大于0
+        
+        <问财高增长机构精选>
+    
+        策略介绍
+        跟着机构选股思维选择好行业好股票，往往能让普通投资者实现超额收益。策略选取销售利润年年增长，营业净资产收益率和收入大幅增长的股票，实现远超大盘的收益。
+        
+        策略问句
+        非st，非科创板，非退市，非停牌，流通市值大于5亿元，非同花顺，近1个月有>=1次的减持公告取反，销售毛利率连续3年大于65%，净资产收益率大于15％，营业收入同比增长10以上
+
+
+        实用语句:
+        wencai("涨停，非ST，上市时间大于3个月")
+        wencai("涨停，非ST，上市时间大于3个月，连续涨停天数,首次涨停时间,最终涨停时间,涨停原因类别,涨停封单额,涨停封单量占流通a股比")
+        wencai("近5日涨停次数排名前20，非ST，上市时间大于3个月")
+        wencai("250日新高，非ST，沪深A，上市时间超过250天,股票代码,股票简称,最新价,最新涨跌幅,技术形态,买入信号inter")
+        wencai("今年以来涨幅最大的前50名，非ST")
+        wencai("今年以来跌幅最大的前10名，非ST")
+        wencai("热门股 排名前200")
+        wencai("2022-06-01人气榜排行前200名")
+        wencai("概念板块近14日累计涨幅排名前5")
+        wencai("脑机接口概念股")
+        wencai("均线多头排列，MACD金叉，DIFF上穿中轴")
+        wencai("股价大于10日均线，MACD金叉，换手率大于10%")
+        wencai("黄金坑")
+        wencai("营业收入增长率>10%;营业利润增长率>10%;加权净资产收益率>15%;总资产报酬率>5%")
+        wencai("新股")
+        wencai("2023-3-3 新股")
+        wencai("上市时间不足一个月新股和次新股")
+        wencai("5%<换手率<10%") 
+        wencai("游资营业部连续3天买入") 
+        wencai("股性极佳的自选股")
+        wencai("距离机构目标价还有翻倍空间的股票")
+        wencai("(vol5>vol20)且(vol5>vol60)，(最低价<120日均线)或(最低价<250日均线)或(最高价<upper和100日最高收盘价)") 
+        wencai("macd金叉，成交额增长，(5日均线>20日均线)或(均价>EXPMA50)，最低价/EXPMA50<1.025，涨停价/63日最高收盘价<0.98，(10日均线>20日均线)或(5日均线>120日均线)或(60日均线<120日均线)")
+
+        """
+
         url = "https://eq.10jqka.com.cn/dataQuery/query"
 
         # 定义请求头
@@ -652,7 +713,7 @@ class Quote:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            "Referer": "https://eq.10jqka.com.cn/",  # 可选，模拟来源页面
+            "Referer": "https://eq.10jqka.com.cn/",
             "Connection": "keep-alive"
         }
 
@@ -742,15 +803,17 @@ class Quote:
         if len(code) == 6:
             code = _isdigit2code(code)
         elif len(code) == 8:
-            if code.startswith(("SH", "SZ")):
+            if code.startswith(("SH", "SZ", "BJ")):
                 code = _isdigit2code(code[2:])
-            elif code.endswith(("SH", "SZ")):
+            elif code.endswith(("SH", "SZ", "BJ")):
                 code = _isdigit2code(code[:6])
             else:
                 raise ValueError(
                     "8位代码必须以SH或SZ开头或者结尾，例如 'SH600519' 或 'SZ000001'， '600519SH' 或 '000001SZ'")
         elif len(code) == 9:
-            if code.endswith((".SH", ".SZ")):
+            if code.startswith(("SH.", "SZ.", "BJ.")):
+                code = _isdigit2code(code[3:])
+            elif code.endswith((".SH", ".SZ")):
                 code = _isdigit2code(code[:6])
             else:
                 raise ValueError("9位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
@@ -759,9 +822,14 @@ class Quote:
 
         data = self.main_quote.download(code, start, end, adjust, period, interval, count)
 
-        # 指定列顺序
-        desired_columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'turnover']
-        if all(col in data.columns for col in desired_columns):
-            data = data[desired_columns]
+        # Check if data is not empty
+        if data is not None and not data.empty:
+            # Specify column order
+            desired_columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'turnover']
+            if all(col in data.columns for col in desired_columns):
+                data = data[desired_columns]
+        else:
+            # Handle the case where no data is returned
+            data = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume', 'turnover'])
 
         return data

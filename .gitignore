@@ -46,3 +46,6 @@ logs/
 
 # mypy
 .mypy_cache/
+
+
+.demo/

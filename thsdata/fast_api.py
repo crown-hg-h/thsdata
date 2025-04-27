@@ -34,7 +34,7 @@ def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", 
     # Check if data is empty
     if data.empty:
         print("No data returned. Reconnecting...")
+        global_quote.main_quote.disconnect()  # Reconnect to the server
         global_quote.main_quote.connect()  # Reconnect to the server
-        # data = global_quote.download(code, start, end, adjust, period, interval, count)  # Retry download
 
     return data
