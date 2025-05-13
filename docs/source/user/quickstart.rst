@@ -43,16 +43,16 @@
 
 .. code-block:: python
 
-      from thsdata import Quote
+      from thsdata import THSData
 
 
       def main():
           # 初始化
-          quote = Quote()
-          quote.connect()
+          td = THSData()
+          td.connect()
 
           try:
-              data = quote.stock_codes()
+              data = td.stock_codes()
               print(data)
 
           except Exception as e:
@@ -60,7 +60,7 @@
 
           finally:
               # 断开连接
-              quote.disconnect()
+              td.disconnect()
               print("Disconnected from the server.")
 
 
@@ -91,21 +91,21 @@
 
 
 
-quote查询日k数据
+查询日k数据
 ---------------
 
 .. code-block:: python
 
-        from thsdata import Quote
+        from thsdata import THSData
 
         def main():
             # 初始化
-            quote = Quote()
-            quote.connect()
+            td = THSData()
+            td.connect()
 
             try:
-                # print(quote.about())
-                data = quote.download("USHA600519", count=100)
+                # print(td.about())
+                data = td.download("USHA600519", count=100)
                 print(data)
 
             except Exception as e:
@@ -113,7 +113,7 @@ quote查询日k数据
 
             finally:
                 # 断开连接
-                quote.disconnect()
+                td.disconnect()
                 print("Disconnected from the server.")
 
 
@@ -150,16 +150,16 @@ quote查询日k数据
 
 .. code-block:: python
 
-        from thsdata import Quote
+        from thsdata import THSData
 
         def main():
             # 初始化
-            quote = Quote()
-            quote.connect()
+            td = THSData()
+            td.connect()
 
             try:
-                # print(quote.about())
-                data = quote.ths_industry_block()
+                # print(td.about())
+                data = td.ths_industry_block()
                 print(data)
 
             except Exception as e:
@@ -167,7 +167,7 @@ quote查询日k数据
 
             finally:
                 # 断开连接
-                quote.disconnect()
+                td.disconnect()
                 print("Disconnected from the server.")
 
 
@@ -204,15 +204,15 @@ quote查询日k数据
 
 .. code-block:: python
 
-        from thsdata import Quote
+        from thsdata import THSData
 
         def main():
             # 初始化
-            quote = Quote()
-            quote.connect()
+            td = THSData()
+            td.connect()
 
             try:
-                data = quote.wencai_base("所属概念;所属行业")
+                data = td.wencai_base("所属概念;所属行业")
                 print(data)
 
             except Exception as e:
@@ -220,7 +220,7 @@ quote查询日k数据
 
             finally:
                 # 断开连接
-                quote.disconnect()
+                td.disconnect()
                 print("Disconnected from the server.")
 
 

@@ -16,36 +16,36 @@ API文档
 基础数据
 --------------------
 
-.. automethod:: thsdata.Quote.stock_codes
-.. automethod:: thsdata.Quote.conbond_codes
-.. automethod:: thsdata.Quote.etf_codes
+.. automethod:: thsdata.THSData.stock_codes
+.. automethod:: thsdata.THSData.conbond_codes
+.. automethod:: thsdata.THSData.etf_codes
 
 
 行业概念板块
 --------------------
 
-.. automethod:: thsdata.Quote.ths_industry_block
-.. automethod:: thsdata.Quote.ths_industry_sub_block
-.. automethod:: thsdata.Quote.ths_concept_block
-.. automethod:: thsdata.Quote.ths_block_components
+.. automethod:: thsdata.THSData.ths_industry_block
+.. automethod:: thsdata.THSData.ths_industry_sub_block
+.. automethod:: thsdata.THSData.ths_concept_block
+.. automethod:: thsdata.THSData.ths_block_components
 
 
 行情数据
 --------------------
 
-.. automethod:: thsdata.Quote.download
-.. automethod:: thsdata.Quote.security_bars
-.. automethod:: thsdata.Quote.call_auction
-.. automethod:: thsdata.Quote.corporate_action
-.. automethod:: thsdata.Quote.order_book
-.. automethod:: thsdata.Quote.transaction_history
-.. automethod:: thsdata.Quote.stock_cur_market_data
-.. automethod:: thsdata.Quote.conbond_cur_market_data
+.. automethod:: thsdata.THSData.download
+.. automethod:: thsdata.THSData.security_bars
+.. automethod:: thsdata.THSData.call_auction
+.. automethod:: thsdata.THSData.corporate_action
+.. automethod:: thsdata.THSData.order_book
+.. automethod:: thsdata.THSData.transaction_history
+.. automethod:: thsdata.THSData.stock_cur_market_data
+.. automethod:: thsdata.THSData.conbond_cur_market_data
 
 
 特色数据
 --------------------
-.. automethod:: thsdata.Quote.wencai_select_codes
-.. automethod:: thsdata.Quote.wencai_base
-.. automethod:: thsdata.Quote.attention
-.. automethod:: thsdata.Quote.getshape
+.. automethod:: thsdata.THSData.wencai_select_codes
+.. automethod:: thsdata.THSData.wencai_base
+.. automethod:: thsdata.THSData.attention
+.. automethod:: thsdata.THSData.getshape

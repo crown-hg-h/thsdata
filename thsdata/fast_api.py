@@ -1,9 +1,11 @@
 import pandas as pd
 
-from thsdata.quote import Quote, Adjust, Interval
+from thsdata.thsdata import THSData, Adjust, Interval
 
-global_quote = Quote()
-# global_quote.connect()
+global_thsdata = THSData()
+
+
+# global_thsdata.connect()
 
 def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", interval=Interval.DAY,
              count=-1) -> pd.DataFrame:
@@ -30,21 +32,21 @@ def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", 
         2024-01-03  1694.00  2022929  3411400700  1681.11  1695.22  1676.33
         2024-01-04  1669.00  2155107  3603970100  1693.00  1693.00  1662.93
     """
-    global global_quote  # 声明使用全局变量
+    global global_thsdata  # 声明使用全局变量
     try:
-        data = global_quote.download(code, start, end, adjust, period, interval, count)
+        data = global_thsdata.download(code, start, end, adjust, period, interval, count)
         # Check if data is empty
         if data.empty:
             print("No data returned. Reconnecting...")
-            global_quote.disconnect()  # Reconnect to the server
-            global_quote.connect()  # Reconnect to the server
+            global_thsdata.disconnect()  # Reconnect to the server
+            global_thsdata.connect()  # Reconnect to the server
     except Exception as e:
-        print(f"Error occurred: {e}. Reinitializing Quote...")
-        global_quote = Quote()  # 重新初始化全局 Quote 对象
-        global_quote.connect()
+        print(f"Error occurred: {e}. Reinitializing...")
+        global_thsdata = THSData()  # 重新初始化全局 THSData 对象
+        global_thsdata.connect()
         try:
             # 异常后重试一次
-            data = global_quote.download(code, start, end, adjust, period, interval, count)
+            data = global_thsdata.download(code, start, end, adjust, period, interval, count)
         except Exception as e2:
             print(f"Retry failed: {e2}")
             data = pd.DataFrame()  # 返回空 DataFrame 避免未定义

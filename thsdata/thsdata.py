@@ -104,7 +104,7 @@ def time_2_int(t: datetime) -> int:
     return dst
 
 
-class Quote:
+class THSData:
     def __init__(self, ops: dict = None):
         self.ops = ops
         self.hq = None
