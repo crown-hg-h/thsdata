@@ -732,6 +732,90 @@ class Quote:
 
         return self.hq.wencai_base(condition)
 
+    def attention(self, code: str) -> pd.DataFrame:
+        """舆情关注度.
+
+        :param code: 6位股票代码 eg. 600519
+        :return:
+        """
+
+        url = "https://ai.10jqka.com.cn/stockapi/yuqing/attention"
+
+        # 定义请求头
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Referer": "https://ai.10jqka.com.cn/",
+            "Connection": "keep-alive"
+        }
+
+        # Prepare query parameters
+        params = {"stockCode": code}
+
+        try:
+            # Make HTTP GET request
+            response = requests.get(url, params=params, headers=headers)
+            response.raise_for_status()  # Raise exception for bad status codes
+
+            # Parse JSON response
+            data = response.json()
+
+            # Check status_msg
+            if data.get("message") != "success":
+                return pd.DataFrame()
+
+            # Get stockList array
+            data = data.get("data", [])
+
+            return pd.DataFrame(data)
+
+
+
+        except Exception as e:
+            return pd.DataFrame()
+
+    def getshape(self) -> pd.DataFrame:
+        """k线策略形态.
+
+        :param code: 6位股票代码 eg. 600519
+        :return:
+        """
+
+        url = "https://ai.10jqka.com.cn/igroup/strategy/getshape/"
+
+        # 定义请求头
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Referer": "https://ai.10jqka.com.cn/",
+            "Connection": "keep-alive"
+        }
+
+        # Prepare query parameters
+        params = {}
+
+        try:
+            # Make HTTP GET request
+            response = requests.get(url, params=params, headers=headers)
+            response.raise_for_status()  # Raise exception for bad status codes
+
+            # Parse JSON response
+            data = response.json()
+
+            # Check status_msg
+            if data.get("errormsg") != "":
+                return pd.DataFrame()
+
+            # Get stockList array
+            data = data.get("result", [])
+
+            return pd.DataFrame(data)
+
+        except Exception as e:
+            return pd.DataFrame()
+
     def download(self, code: str, start=None, end=None, adjust=Adjust.NONE, period="max", interval=Interval.DAY,
                  count=-1) -> pd.DataFrame:
         """获取历史k线数据。
