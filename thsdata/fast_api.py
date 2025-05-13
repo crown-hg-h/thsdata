@@ -3,7 +3,7 @@ import pandas as pd
 from thsdata.quote import Quote, Adjust, Interval
 
 global_quote = Quote()
-
+# global_quote.connect()
 
 def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", interval=Interval.DAY,
              count=-1) -> pd.DataFrame:
@@ -36,11 +36,12 @@ def download(code: str, start=None, end=None, adjust=Adjust.NONE, period="max", 
         # Check if data is empty
         if data.empty:
             print("No data returned. Reconnecting...")
-            global_quote.main_quote.disconnect()  # Reconnect to the server
-            global_quote.main_quote.connect()  # Reconnect to the server
+            global_quote.disconnect()  # Reconnect to the server
+            global_quote.connect()  # Reconnect to the server
     except Exception as e:
         print(f"Error occurred: {e}. Reinitializing Quote...")
         global_quote = Quote()  # 重新初始化全局 Quote 对象
+        global_quote.connect()
         try:
             # 异常后重试一次
             data = global_quote.download(code, start, end, adjust, period, interval, count)

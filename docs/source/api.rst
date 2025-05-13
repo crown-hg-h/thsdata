@@ -17,7 +17,7 @@ API文档
 --------------------
 
 .. automethod:: thsdata.Quote.stock_codes
-.. automethod:: thsdata.Quote.cbond_codes
+.. automethod:: thsdata.Quote.conbond_codes
 .. automethod:: thsdata.Quote.etf_codes
 
 
@@ -40,9 +40,10 @@ API文档
 .. automethod:: thsdata.Quote.order_book
 .. automethod:: thsdata.Quote.transaction_history
 .. automethod:: thsdata.Quote.stock_cur_market_data
-.. automethod:: thsdata.Quote.cbond_cur_market_data
+.. automethod:: thsdata.Quote.conbond_cur_market_data
 
 
 特色数据
 --------------------
-.. automethod:: thsdata.Quote.wencai
+.. automethod:: thsdata.Quote.wencai_select_codes
+.. automethod:: thsdata.Quote.wencai_base
