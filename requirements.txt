@@ -1,6 +1,6 @@
-pandas>=2.2.2
-thsdk>=0.0.7
-
-pytz~=2025.1
-requests~=2.32.3
-setuptools~=75.6.0
+requests>=2.32.3
+thsdata>=0.0.78
+pytz>=2025.1
+pandas>=2.2.3
+thsdk>=0.0.20
+setuptools>=75.6.0
