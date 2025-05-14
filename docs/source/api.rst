@@ -47,5 +47,6 @@ API文档
 --------------------
 .. automethod:: thsdata.THSData.wencai_select_codes
 .. automethod:: thsdata.THSData.wencai_base
+.. automethod:: thsdata.THSData.wencai_nlp
 .. automethod:: thsdata.THSData.attention
 .. automethod:: thsdata.THSData.getshape
