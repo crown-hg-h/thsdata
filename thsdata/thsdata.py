@@ -732,6 +732,15 @@ class THSData:
 
         return self.hq.wencai_base(condition)
 
+    def wencai_nlp(self, condition: str) -> pd.DataFrame:
+        """问财nlp.
+
+        :param condition: 条件选股
+        :return:
+        """
+
+        return self.hq.wencai_nlp(condition)
+
     def attention(self, code: str) -> pd.DataFrame:
         """舆情关注度.
 
@@ -877,3 +886,13 @@ class THSData:
             data = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume', 'turnover'])
 
         return data
+
+    def dc(self):
+
+        """
+            东方财富 推送
+            http://74.push2.eastmoney.com/api/qt/clist/get?pn=1&pz=700&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|1|0|web&fid=f243&fs=b:MK0354&fields=f1,f5,f30,f152,f2,f3,f12,f13,f14,f227,f228,f229,f230,f231,f232,f233,f234,f235,f236,f237,f238,f239,f240,f241,f242,f26,f243&_=1686201469778
+            https://push2.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&ndays=1&iscr=1&secid=1.000001
+            https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ndays=1&secid=0.000422
+        :return:
+        """

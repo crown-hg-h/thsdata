@@ -8,9 +8,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.79'
+VERSION = '0.0.80'
 DESCRIPTION = '金融行情数据查询API'
-LONG_DESCRIPTION = 'a python package for thsdata. 金融行情数据查询API，基于thsdk二次开发。'
+LONG_DESCRIPTION = 'a python package for thsdata. 金融行情数据查询API。'
 
 # Setting up
 setup(
@@ -26,9 +26,9 @@ setup(
     install_requires=[
         'pandas>=2.2.2',
         'thsdk>=0.0.7',
-        'pytz~=2025.1',
-        'requests~=2.32.3',
-        'setuptools~=75.6.0',
+        'pytz>=2025.1',
+        'requests>=2.22.2',
+        'setuptools>=75.2.0',
     ],
     keywords=['python', 'thsdata'],
     classifiers=[
