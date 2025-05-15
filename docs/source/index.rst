@@ -13,9 +13,13 @@ Thsdata 文档说明
 
 **Python使用Thsdata**::
 
-      >>> import thsdata as td
-      >>> td.download("600519", start="2024-01-01", end="2025-01-01")
-      2025/04/23 08:22:04 Hello thsdk!
+      >>> from thsdata import THSData
+      >>> with THSData() as td:
+      ...     data = td.download("600519", start=20240101, end=20250101)
+      ...     print(data)
+      ...
+      Hello thsdk!
+      2025-05-15 13:17:19,379 [INFO] thsdk.ths_api: Connected to THS server successfully
                 time     open     high      low    close   volume    turnover
       0   2024-01-02  1715.00  1718.19  1678.10  1685.01  3215644  5440082500
       1   2024-01-03  1681.11  1695.22  1676.33  1694.00  2022929  3411400700
@@ -30,6 +34,7 @@ Thsdata 文档说明
       241 2024-12-31  1525.40  1545.00  1522.01  1524.00  3935445  6033540400
 
       [242 rows x 7 columns]
+      2025-05-15 13:17:19,661 [INFO] thsdk.ths_api: Disconnected from THS server
 
 
 **Thsdata** 提供ths的查询金融数据和行情数据.基于thsdk上的二次开发.thanks to `thsdk <https://pypi.org/project/thsdk/>`_.

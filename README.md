@@ -10,10 +10,11 @@ pip install --upgrade thsdata
 
 三行代码快速开始
 ```python
-import thsdata as td
+from thsdata import THSData
 
-data = td.download("600519", start=20240101, end=20250101)
-print(data)
+with THSData() as td:
+    print(td.download("600519", start=20240101, end=20250101))
+
 
 ```
 

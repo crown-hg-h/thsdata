@@ -107,9 +107,16 @@ def time_2_int(t: datetime) -> int:
 class THSData:
     def __init__(self, ops: dict = None):
         self.ops = ops
-        self.hq = None
+        self.hq = THS(self.ops)
 
         self.__share_instance = random.randint(80000000, 99999999)
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
 
     @property
     def share_instance(self):
@@ -117,12 +124,10 @@ class THSData:
         return self.__share_instance
 
     def connect(self):
-        self.hq = THS(self.ops)
         self.hq.connect()
 
     def disconnect(self):
-        if self.hq:
-            self.hq.disconnect()
+        self.hq.disconnect()
 
     def about(self):
         about = "\n\nabout me: 本项目基于thsdk二次开发。仅用于个人对网络协议的研究和习作，不对外提供服务。请勿用于非法用途，对此造成的任何问题概不负责。 \n\n"

@@ -10,10 +10,11 @@
 
 .. code-block:: python
 
-        import thsdata as td
+        from thsdata import THSData
 
-        data = td.download("USHA600519", start="2024-01-01", end="2025-01-01")
-        print(data)
+        with THSData() as td:
+            data = td.download("600519", start=20240101, end=20250101)
+            print(data)
 
 
 
@@ -45,28 +46,9 @@
 
       from thsdata import THSData
 
-
-      def main():
-          # 初始化
-          td = THSData()
-          td.connect()
-
-          try:
-              data = td.stock_codes()
-              print(data)
-
-          except Exception as e:
-              print("An error occurred:", e)
-
-          finally:
-              # 断开连接
-              td.disconnect()
-              print("Disconnected from the server.")
-
-
-      if __name__ == "__main__":
-          main()
-
+      with THSData() as td:
+        data = td.stock_codes()
+        print(data)
 
 
 
@@ -98,28 +80,9 @@
 
         from thsdata import THSData
 
-        def main():
-            # 初始化
-            td = THSData()
-            td.connect()
-
-            try:
-                # print(td.about())
-                data = td.download("USHA600519", count=100)
-                print(data)
-
-            except Exception as e:
-                print("An error occurred:", e)
-
-            finally:
-                # 断开连接
-                td.disconnect()
-                print("Disconnected from the server.")
-
-
-        if __name__ == "__main__":
-            main()
-
+        with THSData() as td:
+            data = td.download("USHA600519", count=100)
+            print(data)
 
 
 
@@ -127,21 +90,20 @@
 
 .. code-block:: text
 
-              time     open     high      low    close   volume    turnover
-    0   2024-12-09  1522.02  1529.72  1513.20  1518.80  1979986  3008173600
-    1   2024-12-10  1570.00  1579.73  1545.18  1546.59  6031210  9421340700
-    2   2024-12-11  1540.00  1555.00  1530.98  1535.60  2967112  4569662600
-    3   2024-12-12  1532.02  1566.00  1529.00  1565.80  4193652  6510547800
-    4   2024-12-13  1550.01  1554.99  1518.88  1519.00  4951197  7580908300
-    ..         ...      ...      ...      ...      ...      ...         ...
-    96  2025-05-07  1570.00  1570.00  1550.20  1555.00  2746221  4275142600
-    97  2025-05-08  1553.00  1592.78  1549.83  1578.19  3348106  5265446400
-    98  2025-05-09  1578.99  1597.45  1575.05  1591.18  2367190  3757574500
-    99  2025-05-12  1598.00  1618.93  1596.61  1604.50  2473533  3967785800
-    100 2025-05-13  1608.92  1608.92  1585.11  1590.78  1917953  3055813300
+                  time     open     high      low    close   volume    turnover
+        0   2024-12-11  1540.00  1555.00  1530.98  1535.60  2967112  4569662600
+        1   2024-12-12  1532.02  1566.00  1529.00  1565.80  4193652  6510547800
+        2   2024-12-13  1550.01  1554.99  1518.88  1519.00  4951197  7580908300
+        3   2024-12-16  1521.00  1529.00  1510.71  1527.20  3253710  4945298800
+        4   2024-12-17  1525.99  1569.00  1521.01  1558.00  5417163  8398945400
+        ..         ...      ...      ...      ...      ...      ...         ...
+        96  2025-05-09  1578.99  1597.45  1575.05  1591.18  2367190  3757574500
+        97  2025-05-12  1598.00  1618.93  1596.61  1604.50  2473533  3967785800
+        98  2025-05-13  1608.92  1608.92  1585.11  1590.30  2125829  3386617800
+        99  2025-05-14  1590.00  1645.00  1588.18  1634.99  3946012  6394735100
+        100 2025-05-15  1634.80  1643.59  1624.13  1634.04  1750022  2861327900
 
-   [278 rows x 7 columns]
-   Disconnected from the server.
+        [101 rows x 7 columns]
 
 
 
@@ -152,28 +114,9 @@
 
         from thsdata import THSData
 
-        def main():
-            # 初始化
-            td = THSData()
-            td.connect()
-
-            try:
-                # print(td.about())
-                data = td.ths_industry_block()
-                print(data)
-
-            except Exception as e:
-                print("An error occurred:", e)
-
-            finally:
-                # 断开连接
-                td.disconnect()
-                print("Disconnected from the server.")
-
-
-        if __name__ == "__main__":
-            main()
-
+        with THSData() as td:
+            data = td.ths_industry_block()
+            print(data)
 
 
 
@@ -198,6 +141,60 @@
     Disconnected from the server.
 
 
+行业成份股案例
+---------------
+
+.. code-block:: python
+
+        import pandas as pd
+        from thsdata import THSData
+
+        with THSData() as td:
+            result = td.ths_industry_block()
+            if not result.empty:
+                formatted_data = []  # List to store formatted rows
+
+                for _, row in result.iterrows():
+                    block_code = row['code']  # Get the block code
+                    block_name = row['name']  # Get the block name
+                    components = td.ths_block_components(block_code)  # Get components for the block
+                    if not components.empty:
+                        stock_codes = components['code'].tolist()  # Extract stock codes as a list
+                        formatted_data.append({
+                            'block_code': block_code,
+                            'block_name': block_name,
+                            'components': stock_codes
+                        })
+
+                    print(block_code, block_name,f"成份数量:{len(components)}")
+
+                # Convert to DataFrame and save to CSV
+                formatted_df = pd.DataFrame(formatted_data)
+                formatted_df.to_csv('all_block_components.csv', index=False, encoding='utf-8')
+                print("All block components saved to 'all_block_components.csv'.")
+            else:
+                print("No industry block data found.")
+
+
+
+
+
+.. code-block:: text
+
+    URFI881165 综合 成份数量:22
+    URFI881171 自动化设备 成份数量:92
+    URFI881118 专用设备 成份数量:191
+    URFI881141 中药 成份数量:71
+    ...
+    URFI881156 保险 成份数量:6
+    URFI881138 包装印刷 成份数量:46
+    URFI881121 半导体 成份数量:160
+    URFI881131 白色家电 成份数量:43
+    URFI881273 白酒 成份数量:20
+    URFI881271 IT服务 成份数量:126
+    All block components saved to 'all_block_components.csv'.
+
+
 
 问财查询
 ---------------
@@ -206,26 +203,9 @@
 
         from thsdata import THSData
 
-        def main():
-            # 初始化
-            td = THSData()
-            td.connect()
-
-            try:
-                data = td.wencai_base("所属概念;所属行业")
-                print(data)
-
-            except Exception as e:
-                print("An error occurred:", e)
-
-            finally:
-                # 断开连接
-                td.disconnect()
-                print("Disconnected from the server.")
-
-
-        if __name__ == "__main__":
-            main()
+        with THSData() as td:
+            data = td.wencai_base("所属概念;所属行业")
+            print(data)
 
 
 
@@ -248,7 +228,7 @@
         Disconnected from the server.
 
 
-问财
+问财NLP
 ---------------
 
 .. code-block:: python
