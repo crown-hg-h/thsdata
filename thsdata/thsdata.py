@@ -1,13 +1,23 @@
+# -*- coding: utf-8 -*-
+# File: thsdata.py
+# Description: This module provides a wrapper for THS SDK to interact with stock market data,
+#              including industry blocks, stock components, K-line data, and more.
+# Author: bensema
+# Date: 2025-05-15
+# License: MIT
+# Version: 1.0.0
+# Note: This project is for personal research and study purposes only.
+#       It is not intended for illegal use, and the author is not responsible for any issues caused by misuse.
+
 import pytz
 import json
 import random
 import requests
 import datetime
 import pandas as pd
-from typing import List, Tuple
-from datetime import datetime, time
-
 from thsdk import THS
+from typing import Any, List, Optional, Tuple
+from datetime import datetime, time
 
 china_tz = pytz.timezone('Asia/Shanghai')
 
@@ -94,7 +104,7 @@ def _isdigit2code(code: str) -> str:
     return market + code
 
 
-def time_2_int(t: datetime) -> int:
+def _time_2_int(t: datetime) -> int:
     dst = (t.minute +
            (t.hour << 6) +
            (t.day << 11) +
@@ -247,8 +257,8 @@ class THSData:
         m_period = {0x3001, 0x3005, 0x300f, 0x301e, 0x303c, 0x3078, }
 
         if period in m_period:
-            start_int = time_2_int(start)
-            end_int = time_2_int(end)
+            start_int = _time_2_int(start)
+            end_int = _time_2_int(end)
         else:
             if start.tzinfo is None:
                 # If naive, localize to Beijing timezone
@@ -276,7 +286,7 @@ class THSData:
         return pd.DataFrame(resp.data)
 
     def ths_industry_block(self) -> pd.DataFrame:
-        """获取同花顺行业板块.
+        """获取行业板块.
 
         :return: pandas.DataFrame
 
@@ -298,7 +308,7 @@ class THSData:
         return self._block_data(0xCE5F)
 
     def ths_industry_sub_block(self) -> pd.DataFrame:
-        """获取同花顺三级行业板块.
+        """获取三级行业板块.
 
         :return: pandas.DataFrame
 
@@ -320,7 +330,7 @@ class THSData:
         return self._block_data(0xc4b5)
 
     def ths_concept_block(self) -> pd.DataFrame:
-        """获取同花顺概念板块.
+        """获取概念板块.
 
         :return: pandas.DataFrame
 
@@ -830,8 +840,10 @@ class THSData:
         except Exception as e:
             return pd.DataFrame()
 
-    def download(self, code: str, start=None, end=None, adjust=Adjust.NONE, period="max", interval=Interval.DAY,
-                 count=-1) -> pd.DataFrame:
+    def download(self, code: str, start: Optional[Any] = None, end: Optional[Any] = None, adjust: str = Adjust.NONE,
+                 period: str = "max",
+                 interval: int = Interval.DAY,
+                 count: int = -1) -> pd.DataFrame:
         """获取历史k线数据。
 
        :param period:  str max
@@ -845,6 +857,7 @@ class THSData:
        :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
        :param adjust: 复权类型，必须是有效的复权值之一。
        :param interval: 周期类型，必须是有效的周期值之一。
+       :param count: 指定数量
 
        :return: pandas.DataFrame
 

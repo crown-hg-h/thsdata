@@ -1,14 +1,20 @@
-# thsdata
+# THSData
 
-# Installation
+**THSData** 提供了一种从thsdk中获取金融和市场数据的Pythonic方式。
+
+<a target="new" href="https://pypi.python.org/pypi/thsdata"><img border=0 src="https://img.shields.io/pypi/pyversions/thsdata.svg" alt="Python version"></a>
+<a target="new" href="https://github.com/bensema/thsdata"><img border=0 src="https://img.shields.io/github/stars/bensema/thsdata.svg?style=social&label=Star&maxAge=60" alt="Star this repo"></a>
+
+# 安装
 
 ```bash
 pip install --upgrade thsdata
 ```
 
-# Usage
+# 使用
 
-三行代码快速开始
+三行代码查询股票历史数据
+
 ```python
 from thsdata import THSData
 
@@ -18,7 +24,7 @@ with THSData() as td:
 
 ```
 
-result:
+执行结果：
 
 ```
           time     open     high      low    close   volume    turnover
