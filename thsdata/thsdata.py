@@ -12,65 +12,15 @@
 import pytz
 import json
 import random
+import inspect
 import requests
 import datetime
 import pandas as pd
-from thsdk import THS
+from thsdk import THS, Adjust, Interval
 from typing import Any, List, Optional, Tuple
 from datetime import datetime, time
 
 china_tz = pytz.timezone('Asia/Shanghai')
-
-
-class Adjust:
-    """Class to represent adjustment types for stock data."""
-    FORWARD = "Q"  # 前复权
-    BACKWARD = "B"  # 后复权
-    NONE = ""  # 不复权
-
-    @classmethod
-    def all_types(cls):
-        """Return all adjustment types as a list."""
-        return [cls.FORWARD, cls.BACKWARD, cls.NONE]
-
-
-class Interval:
-    """Class to represent Kline period types."""
-    MIN_1 = 0x3001  # 1分钟k
-    MIN_5 = 0x3005  # 5分钟k
-    MIN_15 = 0x300f  # 15分钟k
-    MIN_30 = 0x301e  # 30分钟k
-    MIN_60 = 0x303c  # 60分钟k
-    MIN_120 = 0x3078  # 120分钟k
-    DAY = 0x4000  # 日k
-    WEEK = 0x5001  # 周k
-    MONTH = 0x6001  # 月k
-    QUARTER = 0x6003  # 季k
-    YEAR = 0x7001  # 年k
-
-    @classmethod
-    def minute_intervals(cls):
-        """Return all minute-level intervals."""
-        return [
-            cls.MIN_1, cls.MIN_5, cls.MIN_15, cls.MIN_30,
-            cls.MIN_60, cls.MIN_120
-        ]
-
-    @classmethod
-    def day_and_above_intervals(cls):
-        """Return all day-level and above intervals."""
-        return [
-            cls.DAY, cls.WEEK, cls.MONTH,
-            cls.QUARTER, cls.YEAR
-        ]
-
-    @classmethod
-    def all_types(cls):
-        """Return all Kline period types as a list."""
-        return [
-            cls.MIN_1, cls.MIN_5, cls.MIN_15, cls.MIN_30, cls.MIN_60, cls.MIN_120,
-            cls.DAY, cls.WEEK, cls.MONTH, cls.QUARTER, cls.YEAR
-        ]
 
 
 def _isdigit2code(code: str) -> str:
@@ -150,12 +100,11 @@ class THSData:
 
     def query_data(self, req: str, query_type: str = "zhu") -> pd.DataFrame:
         try:
-            reply = self.hq.query_data(req, query_type)
-            if reply.err_code != 0:
-                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+            response = self.hq.query_data(req, query_type)
+            if response.err_code != 0:
+                print(f"Query error: {response.err_code}, Message: {response.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
-            resp = reply.resp
-            df = pd.DataFrame(resp.data)
+            df = pd.DataFrame(response.payload.data)
             return df
 
         except Exception as e:
@@ -164,12 +113,11 @@ class THSData:
 
     def _block_data(self, block_id: int):
         try:
-            reply = self.hq.get_block_data(block_id)
-            if reply.err_code != 0:
-                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+            response = self.hq.get_block_data(block_id)
+            if response.err_code != 0:
+                print(f"Query error: {response.err_code}, Message: {response.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
-            resp = reply.resp
-            df = pd.DataFrame(resp.data)
+            df = pd.DataFrame(response.payload.data)
             return df
         except Exception as e:
             print(f"An exception occurred: {e}")
@@ -177,12 +125,11 @@ class THSData:
 
     def _get_block_components(self, block_code: str) -> pd.DataFrame:
         try:
-            reply = self.hq.get_block_components(block_code)
-            if reply.err_code != 0:
-                print(f"Query error: {reply.err_code}, Message: {reply.err_message}")
+            response = self.hq.get_block_components(block_code)
+            if response.err_code != 0:
+                print(f"Query error: {response.err_code}, Message: {response.err_message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
-            resp = reply.resp
-            df = pd.DataFrame(resp.data)
+            df = pd.DataFrame(response.payload.data)
             return df
         except Exception as e:
             print(f"An exception occurred: {e}")
@@ -277,13 +224,11 @@ class THSData:
             start_int = int(start.strftime('%Y%m%d'))
             end_int = int(end.strftime('%Y%m%d'))
 
-        reply = self.hq.security_bars(code, start_int, end_int, adjust, period)
-        if reply.err_code != 0:
-            print(f"查询错误:{reply.err_code}, 信息:{reply.err_message}")
-            return pd.DataFrame()
-
-        resp = reply.resp
-        return pd.DataFrame(resp.data)
+        response = self.hq.security_bars(code, start_int, end_int, adjust, period)
+        if response.err_code != 0:
+            func_name = inspect.currentframe().f_code.co_name
+            raise ValueError(f"[{func_name}] 查询错误: {response.err_code}, 信息: {response.err_message}")
+        return pd.DataFrame(response.payload.data)
 
     def ths_industry_block(self) -> pd.DataFrame:
         """获取行业板块.
@@ -744,8 +689,12 @@ class THSData:
         :param condition: 条件选股
         :return:
         """
+        response = self.hq.wencai_base(condition)
+        if response.err_code != 0:
+            func_name = inspect.currentframe().f_code.co_name
+            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
 
-        return self.hq.wencai_base(condition)
+        return pd.DataFrame(response.payload.data)
 
     def wencai_nlp(self, condition: str) -> pd.DataFrame:
         """问财nlp.
@@ -753,8 +702,12 @@ class THSData:
         :param condition: 条件选股
         :return:
         """
+        response = self.hq.wencai_nlp(condition)
+        if response.err_code != 0:
+            func_name = inspect.currentframe().f_code.co_name
+            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
 
-        return self.hq.wencai_nlp(condition)
+        return pd.DataFrame(response.payload.data)
 
     def attention(self, code: str) -> pd.DataFrame:
         """舆情关注度.
@@ -891,7 +844,11 @@ class THSData:
 
         code = code.upper()
 
-        data = self.hq.download(code, start, end, adjust, period, interval, count)
+        response = self.hq.download(code, start, end, adjust, period, interval, count)
+        data = pd.DataFrame(response.payload.data)
+        if response.err_code != 0:
+            func_name = inspect.currentframe().f_code.co_name
+            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
 
         # Check if data is not empty
         if data is not None and not data.empty:
