@@ -101,8 +101,8 @@ class THSData:
     def query_data(self, req: str, query_type: str = "zhu") -> pd.DataFrame:
         try:
             response = self.hq.query_data(req, query_type)
-            if response.err_code != 0:
-                print(f"Query error: {response.err_code}, Message: {response.err_message}")
+            if response.code != 0:
+                print(f"查询错误: {response.code}, 信息: {response.message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
             df = pd.DataFrame(response.payload.data)
             return df
@@ -114,8 +114,8 @@ class THSData:
     def _block_data(self, block_id: int):
         try:
             response = self.hq.get_block_data(block_id)
-            if response.err_code != 0:
-                print(f"Query error: {response.err_code}, Message: {response.err_message}")
+            if response.code != 0:
+                print(f"查询错误: {response.code}, 信息: {response.message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
             df = pd.DataFrame(response.payload.data)
             return df
@@ -126,8 +126,8 @@ class THSData:
     def _get_block_components(self, block_code: str) -> pd.DataFrame:
         try:
             response = self.hq.get_block_components(block_code)
-            if response.err_code != 0:
-                print(f"Query error: {response.err_code}, Message: {response.err_message}")
+            if response.code != 0:
+                print(f"查询错误: {response.code}, 信息: {response.message}")
                 return pd.DataFrame()  # Return an empty DataFrame on error
             df = pd.DataFrame(response.payload.data)
             return df
@@ -225,9 +225,9 @@ class THSData:
             end_int = int(end.strftime('%Y%m%d'))
 
         response = self.hq.security_bars(code, start_int, end_int, adjust, period)
-        if response.err_code != 0:
+        if response.code != 0:
             func_name = inspect.currentframe().f_code.co_name
-            raise ValueError(f"[{func_name}] 查询错误: {response.err_code}, 信息: {response.err_message}")
+            raise ValueError(f"[{func_name}] 查询错误: {response.code}, 信息: {response.message}")
         return pd.DataFrame(response.payload.data)
 
     def ths_industry_block(self) -> pd.DataFrame:
@@ -690,9 +690,9 @@ class THSData:
         :return:
         """
         response = self.hq.wencai_base(condition)
-        if response.err_code != 0:
+        if response.code != 0:
             func_name = inspect.currentframe().f_code.co_name
-            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
+            raise ValueError(f"[{func_name}] 错误: {response.code}, 信息: {response.message}")
 
         return pd.DataFrame(response.payload.data)
 
@@ -703,9 +703,9 @@ class THSData:
         :return:
         """
         response = self.hq.wencai_nlp(condition)
-        if response.err_code != 0:
+        if response.code != 0:
             func_name = inspect.currentframe().f_code.co_name
-            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
+            raise ValueError(f"[{func_name}] 错误: {response.code}, 信息: {response.message}")
 
         return pd.DataFrame(response.payload.data)
 
@@ -846,9 +846,9 @@ class THSData:
 
         response = self.hq.download(code, start, end, adjust, period, interval, count)
         data = pd.DataFrame(response.payload.data)
-        if response.err_code != 0:
+        if response.code != 0:
             func_name = inspect.currentframe().f_code.co_name
-            raise ValueError(f"[{func_name}] 错误: {response.err_code}, 信息: {response.err_message}")
+            raise ValueError(f"[{func_name}] 错误: {response.code}, 信息: {response.message}")
 
         # Check if data is not empty
         if data is not None and not data.empty:
@@ -869,5 +869,13 @@ class THSData:
             http://74.push2.eastmoney.com/api/qt/clist/get?pn=1&pz=700&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|1|0|web&fid=f243&fs=b:MK0354&fields=f1,f5,f30,f152,f2,f3,f12,f13,f14,f227,f228,f229,f230,f231,f232,f233,f234,f235,f236,f237,f238,f239,f240,f241,f242,f26,f243&_=1686201469778
             https://push2.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&ndays=1&iscr=1&secid=1.000001
             https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ndays=1&secid=0.000422
+
+            富途
+            https://www.futunn.com/OpenAPI
+
+            美股行情
+            https://polygon.io/
+
+
         :return:
         """
