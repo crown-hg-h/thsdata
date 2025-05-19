@@ -806,8 +806,8 @@ class THSData:
                     9位缩写尾部市场和数字代码:600519.sh
                     10个字符标准ths格式代码(前4位指定市场market，比如并以'USHA'或'USZA'开头):USHA600519
        :param count: 需要的数量，推荐使用此参数
-       :param start: 开始时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
-       :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，使用时间戳。
+       :param start: 开始时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，datetime。
+       :param end: 结束时间，格式取决于周期。对于日级别，使用日期（例如，20241224）。对于分钟级别，datetime。
        :param adjust: 复权类型，必须是有效的复权值之一。
        :param interval: 周期类型，必须是有效的周期值之一。
        :param count: 指定数量
@@ -841,6 +841,9 @@ class THSData:
                 code = _isdigit2code(code[:6])
             else:
                 raise ValueError("9位代码必须以.SH或.SZ结尾，例如 '600519.SH' 或 '000001.SZ'")
+
+        if interval in Interval.minute_intervals() and isinstance(start, datetime) and isinstance(end, datetime):
+            start, end = _time_2_int(start), _time_2_int(end)
 
         code = code.upper()
 
