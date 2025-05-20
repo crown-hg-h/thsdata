@@ -1,86 +1,155 @@
-from matplotlib import pyplot as plt
-import matplotlib.dates as mdates
 from thsdata import THSData, Interval
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import pandas as pd
 import numpy as np
-import matplotlib as mpl
 
-# 设置中文字体支持
-plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
-plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
-
-with THSData() as td:
-    # 获取集合竞价数据
-    df = td.call_auction("USHA600519")
-    df.to_csv("call_auction.csv", index=False)
-    
-    # 确保时间列为datetime类型
+def analyze_weak_to_strong(df, code_name=""):
+    """分析集合竞价数据，识别弱转强的股票模式"""
+    # 确保时间列是datetime类型
     df['time'] = pd.to_datetime(df['time'])
     
-    # 创建样式更好的图表
-    plt.style.use('ggplot')
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+    # 计算价格变化百分比
+    df['price_change_pct'] = df['price'].pct_change() * 100
     
-    # 第一个子图：价格走势
-    line_price = ax1.plot(df['time'], df['price'], 'b-', linewidth=2.5, label='价格')
-    ax1.set_ylabel('价格 (元)', fontsize=14, fontweight='bold')
-    ax1.set_title('贵州茅台(600519)集合竞价数据', fontsize=16, fontweight='bold', pad=15)
-    ax1.grid(True, linestyle='--', alpha=0.5)
+    # 计算成交量变化
+    df['vol_change'] = df['live_vol'].diff()
     
-    # 美化价格图
-    ax1.fill_between(df['time'], df['price'].min(), df['price'], alpha=0.1, color='blue')
+    # 将数据分为前半段和后半段
+    mid_point = len(df) // 2
+    first_half = df.iloc[:mid_point]
+    second_half = df.iloc[mid_point:]
     
-    # 添加最新价格辅助线和标签
-    if not df.empty:
-        last_price = df['price'].iloc[-1]
-        first_price = df['price'].iloc[0]
-        percent_change = (last_price - first_price) / first_price * 100
-        
-        color = 'red' if last_price >= first_price else 'green'
-        
-        ax1.axhline(y=last_price, color=color, linestyle='--', alpha=0.7, linewidth=1.5)
-        ax1.text(df['time'].iloc[-1], last_price, 
-                 f'最新: {last_price:.2f} ({percent_change:+.2f}%)', 
-                 color=color, va='bottom', ha='right', fontweight='bold')
+    # 检查是否符合弱转强模式
+    # 1. 初始价格走低 - 检查前半段是否整体下跌
+    initial_price = df['price'].iloc[0]
+    mid_price = df['price'].iloc[mid_point]
+    final_price = df['price'].iloc[-1]
     
-    # 第二个子图：成交量和买卖委托量
-    volume_bars = ax2.bar(df['time'], df['live_vol'], width=np.timedelta64(20, 's'), 
-              color='forestgreen', alpha=0.7, label='成交量')
-    ax2.set_ylabel('成交量', fontsize=14, fontweight='bold')
+    price_initially_down = mid_price < initial_price
     
-    # 添加委托量信息（如果存在）
-    if 'bid2_vol' in df.columns and 'ask2_vol' in df.columns:
-        ax3 = ax2.twinx()
-        bid_line = ax3.plot(df['time'], df['bid2_vol'], 'r-', linewidth=2, label='买二量')
-        ask_line = ax3.plot(df['time'], df['ask2_vol'], 'b-', linewidth=2, label='卖二量')
-        ax3.set_ylabel('委托量', fontsize=14, fontweight='bold')
-        
-        # 合并图例
-        lines = line_price + bid_line + ask_line
-        labels = [l.get_label() for l in lines]
-        ax1.legend(lines, labels, loc='upper left', frameon=True, fontsize=12)
-    else:
-        ax1.legend(loc='upper left', frameon=True, fontsize=12)
+    # 2. 后半段成交量放大
+    first_half_avg_vol = first_half['live_vol'].mean()
+    second_half_avg_vol = second_half['live_vol'].mean()
+    volume_increased = second_half_avg_vol > first_half_avg_vol * 3  # 成交量至少增加20%
     
-    # 格式化X轴日期显示
-    date_format = mdates.DateFormatter('%H:%M:%S')
-    ax2.xaxis.set_major_formatter(date_format)
-    ax2.xaxis.set_major_locator(mdates.MinuteLocator(interval=1))
-    ax2.set_xlabel('时间', fontsize=14, fontweight='bold')
+    # 3. 后半段价格上升
+    price_finally_up = final_price > mid_price
     
-    # 旋转日期标签
-    plt.setp(ax2.get_xticklabels(), rotation=45, ha='right')
+    # 判断是否符合弱转强模式
+    is_weak_to_strong = price_initially_down and volume_increased and price_finally_up
     
-    # 添加网格线
-    ax2.grid(True, linestyle='--', alpha=0.5)
-    
-    # 紧凑布局
-    fig.tight_layout()
-    
-    # 保存图片
-    plt.savefig('maotai_call_auction.png', dpi=300, bbox_inches='tight')
-    
-    # 显示图形
-    plt.show()
+    return is_weak_to_strong
 
+def get_daily_return(td, code):
+    """获取股票当日收益率"""
+    try:
+        # 获取当前市场数据
+        market_data = td.stock_cur_market_data([code])
+        if market_data.empty:
+            print(f"无法获取 {code} 的市场数据")
+            return None
+        
+        # 打印列名用于调试
+        print(f"股票 {code} 市场数据列: {list(market_data.columns)}")
+        
+        # 直接检查涨跌幅字段是否存在
+        # 常见可能的涨跌幅字段名
+        possible_change_fields = ['涨跌幅', 'price_change_pct', 'change_pct', 'price_change_rate', 
+                            'chg', 'change', 'change_rate', 'increase_rate']
+        
+        for field in possible_change_fields:
+            if field in market_data.columns:
+                return round(market_data[field].iloc[0], 2)
+        
+        # 如果没有直接的涨跌幅字段，检查是否有当前价和昨收价
+        price_fields = {'当前价': ['price', 'last_price', 'close', '现价', '最新价', 'current_price']}
+        pre_close_fields = {'昨收价': ['pre_close', 'previous_close', 'yesterday_close', '昨收', '昨日收盘价']}
+        
+        # 找到价格字段
+        current_price = None
+        for key, alternatives in price_fields.items():
+            for field in [key] + alternatives:
+                if field in market_data.columns:
+                    current_price = market_data[field].iloc[0]
+                    print(f"当前价格({field}): {current_price}")
+                    break
+            if current_price is not None:
+                break
+                
+        # 找到昨收价字段
+        pre_close = None
+        for key, alternatives in pre_close_fields.items():
+            for field in [key] + alternatives:
+                if field in market_data.columns:
+                    pre_close = market_data[field].iloc[0]
+                    print(f"昨收价({field}): {pre_close}")
+                    break
+            if pre_close is not None:
+                break
+        
+        # 计算涨跌幅
+        if current_price is not None and pre_close is not None and pre_close != 0:
+            return round((current_price / pre_close - 1) * 100, 2)
+        
+        print(f"无法计算 {code} 的涨跌幅：找不到必要字段")
+        return None
+    except Exception as e:
+        print(f"获取 {code} 当日收益率时出错: {e}")
+        return None
+
+with THSData() as td:
+    # 获取股票代码和名称映射
+    stock_info = td.stock_codes()
+    stock_name_map = dict(zip(stock_info['code'], stock_info['name']))
+    
+    # 获取集合竞价数据
+    codes = list(td.wencai_select_codes("今日竞价抢筹，股价在5-20之间")[0])
+    print(f"分析 {len(codes)} 只今日竞价弱转强股票的集合竞价数据")
+    
+    weak_to_strong_stocks = []
+    
+    for code in codes:
+        stock_name = stock_name_map.get(code, code)
+        
+        # 排除ST股票, 科创板(688开头), 创业板(300开头), 北交所(8开头)
+        if "ST" in stock_name or code.startswith(("688", "30", "8")):
+            print(f"跳过 {code} {stock_name} (ST股或科创板/创业板/北交所)")
+            continue
+            
+        print(f"分析 {code} {stock_name}")
+        
+        # 获取集合竞价数据
+        df = td.call_auction(code)
+        
+        # 保存数据到CSV (只保存第一个股票的数据，避免覆盖)
+        if code == codes[0]:
+            df.to_csv("call_auction.csv", index=False)
+        
+        # 分析是否为弱转强模式
+        is_weak_to_strong = analyze_weak_to_strong(df, f"{code} {stock_name}")
+        
+        if is_weak_to_strong:
+            weak_to_strong_stocks.append((code, stock_name))
+    
+    # 输出弱转强股票列表
+    if weak_to_strong_stocks:
+        print(f"\n找到 {len(weak_to_strong_stocks)} 只符合弱转强模式的股票:")
+        for code, name in weak_to_strong_stocks:
+            print(f"{code} {name}")
+        
+        # 保存筛选出的股票到CSV表格
+        result_data = []
+        for code, name in weak_to_strong_stocks:
+            # 提取股票代码中的6位数字
+            numeric_code = ''.join(filter(str.isdigit, code))[-6:]
+            # 再次确认不包含ST股票、科创板和创业板
+            if "ST" in name or numeric_code.startswith(("688", "30")):
+                continue
+            result_data.append((numeric_code, name))
+            
+        df_result = pd.DataFrame(result_data, columns=['代码', '名称'])
+        df_result['日期'] = datetime.now().strftime('%Y-%m-%d')
+        df_result.to_csv("weak_to_strong_stocks.csv", index=False, encoding='utf-8-sig')
+        print(f"已将筛选结果保存至 weak_to_strong_stocks.csv")
+    else:
+        print("\n没有找到符合弱转强模式的股票")
