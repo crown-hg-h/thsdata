@@ -10,77 +10,139 @@ import matplotlib as mpl
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
-with THSData() as td:
-    # 获取集合竞价数据
-    df = td.call_auction("USHA600519")
-    df.to_csv("call_auction.csv", index=False)
+def analyze_call_auction(df):
+    # 计算价格变化率
+    df['price_change'] = df['price'].pct_change()
     
-    # 确保时间列为datetime类型
-    df['time'] = pd.to_datetime(df['time'])
+    # 将数据分为前期和后期（以9:20为分界点）
+    early_period = df[df['time'].dt.time < time(9, 20)]
+    late_period = df[df['time'].dt.time >= time(9, 20)]
     
-    # 创建样式更好的图表
-    plt.style.use('ggplot')
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+    # 计算前后期成交量比值
+    early_volume_sum = early_period['live_vol'].sum() if len(early_period) > 0 else 1
+    late_volume_sum = late_period['live_vol'].sum() if len(late_period) > 0 else 0
+    volume_ratio = late_volume_sum / early_volume_sum if early_volume_sum > 0 else 0
     
-    # 第一个子图：价格走势
-    line_price = ax1.plot(df['time'], df['price'], 'b-', linewidth=2.5, label='价格')
-    ax1.set_ylabel('价格 (元)', fontsize=14, fontweight='bold')
-    ax1.set_title('贵州茅台(600519)集合竞价数据', fontsize=16, fontweight='bold', pad=15)
-    ax1.grid(True, linestyle='--', alpha=0.5)
+    # 判断条件
+    conditions = {
+        '前期下跌': early_period['price_change'].mean() < 0,
+        '后期上涨': late_period['price_change'].mean() > 0,
+        '弱转强': early_period['price_change'].mean() < late_period['price_change'].mean()
+    }
     
-    # 美化价格图
-    ax1.fill_between(df['time'], df['price'].min(), df['price'], alpha=0.1, color='blue')
+    # 返回结果
+    results = {
+        '前期下跌': conditions['前期下跌'],
+        '后期上涨': conditions['后期上涨'],
+        '成交量比值': volume_ratio,
+        '弱转强': conditions['弱转强']
+    }
     
-    # 添加最新价格辅助线和标签
-    if not df.empty:
-        last_price = df['price'].iloc[-1]
-        first_price = df['price'].iloc[0]
-        percent_change = (last_price - first_price) / first_price * 100
-        
-        color = 'red' if last_price >= first_price else 'green'
-        
-        ax1.axhline(y=last_price, color=color, linestyle='--', alpha=0.7, linewidth=1.5)
-        ax1.text(df['time'].iloc[-1], last_price, 
-                 f'最新: {last_price:.2f} ({percent_change:+.2f}%)', 
-                 color=color, va='bottom', ha='right', fontweight='bold')
-    
-    # 第二个子图：成交量和买卖委托量
-    volume_bars = ax2.bar(df['time'], df['live_vol'], width=np.timedelta64(20, 's'), 
-              color='forestgreen', alpha=0.7, label='成交量')
-    ax2.set_ylabel('成交量', fontsize=14, fontweight='bold')
-    
-    # 添加委托量信息（如果存在）
-    if 'bid2_vol' in df.columns and 'ask2_vol' in df.columns:
-        ax3 = ax2.twinx()
-        bid_line = ax3.plot(df['time'], df['bid2_vol'], 'r-', linewidth=2, label='买二量')
-        ask_line = ax3.plot(df['time'], df['ask2_vol'], 'b-', linewidth=2, label='卖二量')
-        ax3.set_ylabel('委托量', fontsize=14, fontweight='bold')
-        
-        # 合并图例
-        lines = line_price + bid_line + ask_line
-        labels = [l.get_label() for l in lines]
-        ax1.legend(lines, labels, loc='upper left', frameon=True, fontsize=12)
-    else:
-        ax1.legend(loc='upper left', frameon=True, fontsize=12)
-    
-    # 格式化X轴日期显示
-    date_format = mdates.DateFormatter('%H:%M:%S')
-    ax2.xaxis.set_major_formatter(date_format)
-    ax2.xaxis.set_major_locator(mdates.MinuteLocator(interval=1))
-    ax2.set_xlabel('时间', fontsize=14, fontweight='bold')
-    
-    # 旋转日期标签
-    plt.setp(ax2.get_xticklabels(), rotation=45, ha='right')
-    
-    # 添加网格线
-    ax2.grid(True, linestyle='--', alpha=0.5)
-    
-    # 紧凑布局
-    fig.tight_layout()
-    
-    # 保存图片
-    plt.savefig('maotai_call_auction.png', dpi=300, bbox_inches='tight')
-    
-    # 显示图形
-    plt.show()
+    return results
 
+# 判断是否为ST股票
+def is_st_stock(stock_name):
+    return 'ST' in stock_name or 'st' in stock_name or '*' in stock_name
+
+# 判断是否为科创板或创业板
+def is_special_board(code):
+    # 科创板以688开头
+    if code[4:7] == '688':
+        return True
+    # 创业板以300开头
+    if code[4:7] == '300':
+        return True
+    return False
+
+# 创建结果DataFrame
+results_df = pd.DataFrame(columns=['股票代码', '股票名称', '今日收益率', '前期下跌', '后期上涨', '成交量比值', '弱转强'])
+
+with THSData() as td:
+    # 获取集合竞价数据，排除ST、科创板和创业板
+    codes = list(td.wencai_select_codes("今日集合竞价抢筹，人气前一百股，非ST，非科创板，非创业板")[0])
+    print("获取到的股票代码:", codes)
+    
+    # 获取沪深股票代码和名称映射
+    stock_info = td.stock_codes()
+    stock_dict = dict(zip(stock_info['code'], stock_info['name']))
+    
+    # 获取当前日期
+    today = datetime.now()
+    
+    for code in codes:
+        # 获取股票名称
+        stock_name = stock_dict.get(code, "未知")
+        
+        # 跳过ST股票
+        if is_st_stock(stock_name):
+            print(f"跳过ST股票: {code} ({stock_name})")
+            continue
+            
+        # 跳过科创板和创业板股票
+        if is_special_board(code):
+            print(f"跳过科创板/创业板股票: {code} ({stock_name})")
+            continue
+        
+        # 获取今日收益率
+        today_return_rate = 0.0
+        try:
+            # 获取今日K线数据
+            start_date = datetime(today.year, today.month, today.day)
+            end_date = datetime(today.year, today.month, today.day, 23, 59, 59)
+            today_data = td.security_bars(code, start_date, end_date, "", Interval.DAY)
+            
+            if not today_data.empty:
+                # 计算收益率 = (收盘价 - 开盘价) / 开盘价
+                today_return_rate = (today_data['close'].iloc[0] - today_data['open'].iloc[0]) / today_data['open'].iloc[0] * 100
+            else:
+                # 如果无法获取日K线，尝试使用当前市场数据
+                market_data = td.stock_cur_market_data([code])
+                if not market_data.empty and 'price' in market_data.columns and 'open' in market_data.columns:
+                    open_price = market_data['open'].iloc[0]
+                    if open_price > 0:
+                        today_return_rate = (market_data['price'].iloc[0] - open_price) / open_price * 100
+        except Exception as e:
+            print(f"获取 {code} 今日收益率时出错: {e}")
+        
+        # 获取集合竞价数据
+        df = td.call_auction(code)
+        # 将时间列转换为datetime类型
+        df['time'] = pd.to_datetime(df['time'])
+        
+        # 分析集合竞价数据
+        results = analyze_call_auction(df)
+        
+        # 打印分析结果
+        print(f"\n股票代码: {code} ({stock_name})")
+        print(f"今日收益率: {today_return_rate:.2f}%")
+        print("分析结果:")
+        for key, value in results.items():
+            print(f"{key}: {value}")
+        
+        # 将结果添加到DataFrame
+        results_df = pd.concat([results_df, pd.DataFrame({
+            '股票代码': [code],
+            '股票名称': [stock_name],
+            '今日收益率': [today_return_rate],
+            '前期下跌': [results['前期下跌']],
+            '后期上涨': [results['后期上涨']],
+            '成交量比值': [results['成交量比值']],
+            '弱转强': [results['弱转强']]
+        })], ignore_index=True)
+    
+    # 组合筛选条件：弱转强、前期下跌和后期上涨
+    filtered_stocks = results_df[
+        (results_df['弱转强'] == True) & 
+        (results_df['前期下跌'] == True) & 
+        (results_df['后期上涨'] == True)
+    ]
+    
+    # 按照成交量比值从高到低排序
+    filtered_stocks = filtered_stocks.sort_values(by='成交量比值', ascending=False)
+    
+    # 保存筛选后的结果
+    filtered_stocks.to_csv("weak_to_strong_stocks.csv", index=False, encoding='utf-8-sig')
+    print(f"\n筛选结果：共找到 {len(filtered_stocks)} 只符合条件的股票")
+    print("结果已保存到 weak_to_strong_stocks.csv")
+    print("结果已按照成交量比值从高到低排序")
+ 
